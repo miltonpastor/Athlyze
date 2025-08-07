@@ -184,9 +184,9 @@
                                                             <%= activity.descripcion.length> 60 ? '...' : '' %>
                                                     </div>
                                                     <% if (activity.medidas &&
-                                                        Object.keys(JSON.parse(activity.medidas)).length> 0) { %>
+                                                        Object.keys(activity.medidas).length> 0) { %>
                                                         <small class="text-muted">
-                                                            <% const medidas=JSON.parse(activity.medidas); %>
+                                                            <% const medidas=activity.medidas; %>
                                                                 <% Object.keys(medidas).slice(0, 2).forEach((key,
                                                                     index)=> { %>
                                                                     <%= index> 0 ? ' • ' : '' %><%= key %>: <%=
@@ -200,6 +200,7 @@
                                                                                             <% } %>
                                                         </small>
                                                         <% } %>
+                                                        
                                                 </td>
                                                 <td>
                                                     <div class="fw-semibold">

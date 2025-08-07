@@ -3,10 +3,10 @@ const { Pool } = require('pg');
 // Configuración de la conexión a PostgreSQL
 const pool = new Pool({
     user: process.env.DB_USER || 'odoo',
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || '127.0.0.1',
     database: process.env.DB_NAME || 'athlyze',
     password: process.env.DB_PASSWORD || '12345',
-    port: process.env.DB_PORT || 5432,
+    port: process.env.DB_PORT || 5433,
 });
 
 // Función para ejecutar consultas
