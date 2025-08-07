@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>Athlyze
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="bi bi-house me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/activities">
+                            <i class="bi bi-journal-plus me-1"></i>Actividades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/reports">
+                            <i class="bi bi-graph-up me-1"></i>Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/suggestions">
+                            <i class="bi bi-lightbulb me-1"></i>Consejos
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle btn btn-link text-white" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <%= user.nombre %>
+                                <span class="badge bg-secondary ms-1">
+                                    <%= user.plan.toUpperCase() %>
+                                </span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form action="/logout" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="mb-1">
+                    <i class="bi bi-graph-up text-primary me-2"></i>Reportes de Progreso
+                </h2>
+                <p class="text-muted">Analiza tu progreso y visualiza tus tendencias</p>
+            </div>
+            <div class="col-md-4">
+                <form method="GET" class="d-flex">
+                    <select name="period" class="form-select me-2" onchange="this.form.submit()">
+                        <option value="7" <%=period==='7' ? 'selected' : '' %>>Últimos 7 días</option>
+                        <option value="30" <%=period==='30' ? 'selected' : '' %>>Últimos 30 días</option>
+                        <option value="90" <%=period==='90' ? 'selected' : '' %>>Últimos 90 días</option>
+                        <option value="365" <%=period==='365' ? 'selected' : '' %>>Último año</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                            <i class="bi bi-activity fs-2 text-primary"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">
+                            <%= stats.total_actividades %>
+                        </h3>
+                        <p class="text-muted small mb-0">Total Actividades</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                            <i class="bi bi-heart-pulse fs-2 text-success"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">
+                            <%= stats.ejercicios %>
+                        </h3>
+                        <p class="text-muted small mb-0">Ejercicios</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                            <i class="bi bi-fire fs-2 text-danger"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">
+                            <%= Math.round(stats.total_calorias_quemadas || 0) %>
+                        </h3>
+                        <p class="text-muted small mb-0">Calorías Quemadas</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3">
+                            <i class="bi bi-egg-fried fs-2 text-warning"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1">
+                            <%= Math.round(stats.total_calorias_consumidas || 0) %>
+                        </h3>
+                        <p class="text-muted small mb-0">Calorías Consumidas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Daily Activities Chart -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart me-2"></i>Actividades Diarias
+                        </h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-primary active" onclick="showChart('activities')">
+                                Actividades
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="showChart('calories')">
+                                Calorías
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="dailyChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Type Distribution -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart me-2"></i>Distribución por Tipo
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="pieChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weight Evolution -->
+        <% if (JSON.parse(weightData).length> 0) { %>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Evolución del Peso
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="weightChart" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+                <!-- Top Exercises -->
+                <% if (topExercises.length> 0) { %>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-trophy me-2"></i>Ejercicios Más Frecuentes
+                                    </h5>
+                                    <a href="/reports/exercises" class="btn btn-sm btn-outline-primary">
+                                        Ver detalles
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <% topExercises.forEach((exercise, index)=> { %>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                                        <span class="fw-bold text-primary">
+                                                            <%= index + 1 %>
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1">
+                                                            <%= exercise.descripcion %>
+                                                        </h6>
+                                                        <small class="text-muted">
+                                                            <%= exercise.frecuencia %> veces
+                                                                <% if (exercise.promedio_calorias) { %>
+                                                                    • ~<%= Math.round(exercise.promedio_calorias) %> cal
+                                                                        promedio
+                                                                        <% } %>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+
+                        <!-- Empty State -->
+                        <% if (stats.total_actividades==0) { %>
+                            <div class="text-center py-5">
+                                <i class="bi bi-graph-up text-muted" style="font-size: 4rem;"></i>
+                                <h4 class="mt-3 text-muted">No hay datos para mostrar</h4>
+                                <p class="text-muted mb-4">
+                                    Registra algunas actividades para ver tus reportes de progreso.
+                                </p>
+                                <a href="/activities/new" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-plus-circle me-2"></i>Registrar Primera Actividad
+                                </a>
+                            </div>
+                            <% } %>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Data preparation
+        const dailyData = JSON.parse('<%- dailyData %>');
+        const typeDistribution = JSON.parse('<%- typeDistribution %>');
+        const weightData = JSON.parse('<%- weightData %>');
+
+        // Daily Activities Chart
+        const dailyCtx = document.getElementById('dailyChart').getContext('2d');
+        let dailyChart = new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: dailyData.map(d => new Date(d.fecha).toLocaleDateString('es-ES', {
+                    month: 'short',
+                    day: 'numeric'
+                })),
+                datasets: [
+                    {
+                        label: 'Total Actividades',
+                        data: dailyData.map(d => parseInt(d.total_actividades)),
+                        borderColor: '#0d6efd',
+                        backgroundColor: '#0d6efd20',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Ejercicios',
+                        data: dailyData.map(d => parseInt(d.ejercicios)),
+                        borderColor: '#198754',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Comidas',
+                        data: dailyData.map(d => parseInt(d.comidas)),
+                        borderColor: '#ffc107',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Pie Chart for Type Distribution
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: typeDistribution.map(t => t.tipo.charAt(0).toUpperCase() + t.tipo.slice(1)),
+                datasets: [{
+                    data: typeDistribution.map(t => parseInt(t.cantidad)),
+                    backgroundColor: [
+                        '#198754',
+                        '#ffc107',
+                        '#0dcaf0'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+
+        // Weight Chart (if data exists)
+        <% if (JSON.parse(weightData).length > 0) { %>
+        const weightCtx = document.getElementById('weightChart').getContext('2d');
+            new Chart(weightCtx, {
+                type: 'line',
+                data: {
+                    labels: weightData.map(d => new Date(d.fecha).toLocaleDateString('es-ES')),
+                    datasets: [{
+                        label: 'Peso (kg)',
+                        data: weightData.map(d => parseFloat(d.peso)),
+                        borderColor: '#dc3545',
+                        backgroundColor: '#dc354520',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#dc3545',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        <% } %>
+
+            // Chart switching function
+            function showChart(type) {
+                const buttons = document.querySelectorAll('.btn-group button');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                event.target.classList.add('active');
+
+                if (type === 'calories') {
+                    dailyChart.data.datasets = [
+                        {
+                            label: 'Calorías Quemadas',
+                            data: dailyData.map(d => parseInt(d.calorias_quemadas) || 0),
+                            borderColor: '#dc3545',
+                            backgroundColor: '#dc354520',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Calorías Consumidas',
+                            data: dailyData.map(d => parseInt(d.calorias_consumidas) || 0),
+                            borderColor: '#ffc107',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        }
+                    ];
+                } else {
+                    dailyChart.data.datasets = [
+                        {
+                            label: 'Total Actividades',
+                            data: dailyData.map(d => parseInt(d.total_actividades)),
+                            borderColor: '#0d6efd',
+                            backgroundColor: '#0d6efd20',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Ejercicios',
+                            data: dailyData.map(d => parseInt(d.ejercicios)),
+                            borderColor: '#198754',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Comidas',
+                            data: dailyData.map(d => parseInt(d.comidas)),
+                            borderColor: '#ffc107',
+                            backgroundColor: 'transparent',
+                            tension: 0.4
+                        }
+                    ];
+                }
+                dailyChart.update();
+            }
+    </script>
+</body>
+
+</html>

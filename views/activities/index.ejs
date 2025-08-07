@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>Athlyze
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="bi bi-house me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/activities">
+                            <i class="bi bi-journal-plus me-1"></i>Actividades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports">
+                            <i class="bi bi-graph-up me-1"></i>Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/suggestions">
+                            <i class="bi bi-lightbulb me-1"></i>Consejos
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle btn btn-link text-white" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <%= user.nombre %>
+                                <span class="badge bg-secondary ms-1">
+                                    <%= user.plan.toUpperCase() %>
+                                </span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form action="/logout" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="mb-1">
+                    <i class="bi bi-journal-plus text-primary me-2"></i>Mis Actividades
+                </h2>
+                <p class="text-muted">Gestiona y revisa todas tus actividades registradas</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="/activities/new" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Nueva Actividad
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="tipo" class="form-label fw-semibold">Tipo</label>
+                        <select class="form-select" id="tipo" name="tipo">
+                            <option value="">Todos los tipos</option>
+                            <option value="ejercicio" <%=filters.tipo==='ejercicio' ? 'selected' : '' %>>Ejercicio
+                            </option>
+                            <option value="alimentacion" <%=filters.tipo==='alimentacion' ? 'selected' : '' %>
+                                >Alimentación</option>
+                            <option value="medidas" <%=filters.tipo==='medidas' ? 'selected' : '' %>>Medidas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fechaDesde" class="form-label fw-semibold">Desde</label>
+                        <input type="date" class="form-control" id="fechaDesde" name="fechaDesde"
+                            value="<%= filters.fechaDesde %>">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fechaHasta" class="form-label fw-semibold">Hasta</label>
+                        <input type="date" class="form-control" id="fechaHasta" name="fechaHasta"
+                            value="<%= filters.fechaHasta %>">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-funnel me-1"></i>Filtrar
+                        </button>
+                        <a href="/activities" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Activities List -->
+        <div class="row">
+            <div class="col-12">
+                <% if (activities.length> 0) { %>
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <%= totalActivities %> actividades encontradas
+                            </h5>
+                            <small class="text-muted">
+                                Página <%= currentPage %> de <%= totalPages %>
+                            </small>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Descripción</th>
+                                            <th>Fecha</th>
+                                            <th>Calorías</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% activities.forEach(activity=> { %>
+                                            <tr>
+                                                <td>
+                                                    <% if (activity.tipo==='ejercicio' ) { %>
+                                                        <span class="badge bg-success">
+                                                            <i class="bi bi-heart-pulse me-1"></i>Ejercicio
+                                                        </span>
+                                                        <% } else if (activity.tipo==='alimentacion' ) { %>
+                                                            <span class="badge bg-warning">
+                                                                <i class="bi bi-egg-fried me-1"></i>Alimentación
+                                                            </span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-info">
+                                                                    <i class="bi bi-speedometer2 me-1"></i>Medidas
+                                                                </span>
+                                                                <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-semibold">
+                                                        <%= activity.descripcion.substring(0, 60) %>
+                                                            <%= activity.descripcion.length> 60 ? '...' : '' %>
+                                                    </div>
+                                                    <% if (activity.medidas &&
+                                                        Object.keys(JSON.parse(activity.medidas)).length> 0) { %>
+                                                        <small class="text-muted">
+                                                            <% const medidas=JSON.parse(activity.medidas); %>
+                                                                <% Object.keys(medidas).slice(0, 2).forEach((key,
+                                                                    index)=> { %>
+                                                                    <%= index> 0 ? ' • ' : '' %><%= key %>: <%=
+                                                                                medidas[key] %>
+                                                                                <% }) %>
+                                                                                    <% if (Object.keys(medidas).length>
+                                                                                        2) { %>
+                                                                                        • +<%=
+                                                                                            Object.keys(medidas).length
+                                                                                            - 2 %> más
+                                                                                            <% } %>
+                                                        </small>
+                                                        <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-semibold">
+                                                        <%= new Date(activity.fecha).toLocaleDateString('es-ES', {
+                                                            weekday: 'short' , year: 'numeric' , month: 'short' ,
+                                                            day: 'numeric' }) %>
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        <%= new
+                                                            Date(activity.fecha_registro).toLocaleTimeString('es-ES', {
+                                                            hour: '2-digit' , minute: '2-digit' }) %>
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    <% if (activity.calorias) { %>
+                                                        <span class="fw-semibold text-primary">
+                                                            <%= activity.calorias %> cal
+                                                        </span>
+                                                        <% } else { %>
+                                                            <span class="text-muted">-</span>
+                                                            <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a href="/activities/<%= activity.id %>"
+                                                            class="btn btn-outline-primary" title="Ver detalles">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-danger"
+                                                            onclick="deleteActivity(<%= activity.id %>)"
+                                                            title="Eliminar">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <% if (totalPages> 1) { %>
+                        <nav class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                    <a class="page-link"
+                                        href="?page=<%= currentPage - 1 %>&tipo=<%= filters.tipo %>&fechaDesde=<%= filters.fechaDesde %>&fechaHasta=<%= filters.fechaHasta %>">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+
+                                <% for (let i=Math.max(1, currentPage - 2); i <=Math.min(totalPages, currentPage + 2);
+                                    i++) { %>
+                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                        <a class="page-link"
+                                            href="?page=<%= i %>&tipo=<%= filters.tipo %>&fechaDesde=<%= filters.fechaDesde %>&fechaHasta=<%= filters.fechaHasta %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                    <% } %>
+
+                                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                            <a class="page-link"
+                                                href="?page=<%= currentPage + 1 %>&tipo=<%= filters.tipo %>&fechaDesde=<%= filters.fechaDesde %>&fechaHasta=<%= filters.fechaHasta %>">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                            </ul>
+                        </nav>
+                        <% } %>
+                            <% } else { %>
+                                <!-- Empty State -->
+                                <div class="text-center py-5">
+                                    <i class="bi bi-journal-plus text-muted" style="font-size: 4rem;"></i>
+                                    <h4 class="mt-3 text-muted">No hay actividades registradas</h4>
+                                    <p class="text-muted mb-4">
+                                        <% if (filters.tipo || filters.fechaDesde || filters.fechaHasta) { %>
+                                            No se encontraron actividades con los filtros seleccionados.
+                                            <br>
+                                            <a href="/activities" class="text-primary">Mostrar todas las actividades</a>
+                                            <% } else { %>
+                                                ¡Comienza tu journey registrando tu primera actividad!
+                                                <% } %>
+                                    </p>
+                                    <a href="/activities/new" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-plus-circle me-2"></i>Registrar Primera Actividad
+                                    </a>
+                                </div>
+                                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que quieres eliminar esta actividad? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteForm" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>Eliminar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function deleteActivity(activityId) {
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            const form = document.getElementById('deleteForm');
+            form.action = `/activities/${activityId}/delete`;
+            modal.show();
+        }
+    </script>
+</body>
+
+</html>

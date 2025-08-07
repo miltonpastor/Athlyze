@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>Athlyze
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="bi bi-house me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/activities">
+                            <i class="bi bi-journal-plus me-1"></i>Actividades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports">
+                            <i class="bi bi-graph-up me-1"></i>Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/suggestions">
+                            <i class="bi bi-lightbulb me-1"></i>Consejos
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle btn btn-link text-white" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <%= user.nombre %>
+                                <span class="badge bg-secondary ms-1">
+                                    <%= user.plan.toUpperCase() %>
+                                </span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form action="/logout" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="bg-primary bg-gradient text-white rounded-3 p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="mb-2">¡Hola, <%= user.nombre %>! 👋</h2>
+                            <p class="mb-0 opacity-75">
+                                Bienvenido a tu dashboard personal. Aquí puedes ver un resumen de tu progreso y
+                                actividades recientes.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="/activities/new" class="btn btn-light btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>Nueva Actividad
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-activity fs-4 text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-1">
+                                    <%= stats.total_actividades %>
+                                </h3>
+                                <p class="text-muted small mb-0">Total Actividades</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-heart-pulse fs-4 text-success"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-1">
+                                    <%= stats.ejercicios %>
+                                </h3>
+                                <p class="text-muted small mb-0">Ejercicios</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-egg-fried fs-4 text-warning"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-1">
+                                    <%= stats.comidas %>
+                                </h3>
+                                <p class="text-muted small mb-0">Comidas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3 me-3">
+                                <i class="bi bi-speedometer2 fs-4 text-info"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-1">
+                                    <%= stats.esta_semana %>
+                                </h3>
+                                <p class="text-muted small mb-0">Esta Semana</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Chart Section -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light border-0">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart me-2"></i>Actividades de la Semana
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="weeklyChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-light border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>Actividades Recientes
+                        </h5>
+                        <a href="/activities" class="btn btn-sm btn-outline-primary">Ver todas</a>
+                    </div>
+                    <div class="card-body">
+                        <% if (recentActivities.length> 0) { %>
+                            <% recentActivities.forEach(activity=> { %>
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                    <div class="me-3">
+                                        <% if (activity.tipo==='ejercicio' ) { %>
+                                            <i class="bi bi-heart-pulse text-success fs-5"></i>
+                                            <% } else if (activity.tipo==='alimentacion' ) { %>
+                                                <i class="bi bi-egg-fried text-warning fs-5"></i>
+                                                <% } else { %>
+                                                    <i class="bi bi-speedometer2 text-info fs-5"></i>
+                                                    <% } %>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">
+                                            <%= activity.descripcion.substring(0, 40) %>
+                                                <%= activity.descripcion.length> 40 ? '...' : '' %>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <%= new Date(activity.fecha).toLocaleDateString('es-ES', { weekday: 'short'
+                                                , month: 'short' , day: 'numeric' }) %>
+                                                <% if (activity.calorias) { %>
+                                                    • <%= activity.calorias %> cal
+                                                        <% } %>
+                                        </small>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div class="text-center text-muted py-4">
+                                            <i class="bi bi-journal-plus fs-2 mb-2"></i>
+                                            <p class="mb-0">No hay actividades recientes</p>
+                                            <a href="/activities/new" class="btn btn-sm btn-primary mt-2">
+                                                Registrar primera actividad
+                                            </a>
+                                        </div>
+                                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions Section -->
+        <% if (suggestions.length> 0) { %>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-light border-0 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>Consejos Personalizados
+                            </h5>
+                            <a href="/suggestions" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <% suggestions.forEach(suggestion=> { %>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="alert alert-info border-0 shadow-sm mb-0">
+                                            <div class="d-flex">
+                                                <i class="bi bi-info-circle me-2 mt-1"></i>
+                                                <div>
+                                                    <p class="mb-1 fw-semibold">
+                                                        <%= suggestion.texto %>
+                                                    </p>
+                                                    <small class="text-muted">
+                                                        <%= new Date(suggestion.fecha).toLocaleDateString('es-ES') %>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart Script -->
+    <script>
+        // Weekly Activities Chart
+        const chartData = JSON.parse('<%- chartData %>');
+
+        // Prepare data for chart
+        const dates = chartData.map(d => new Date(d.fecha).toLocaleDateString('es-ES', {
+            month: 'short',
+            day: 'numeric'
+        }));
+        const activities = chartData.map(d => parseInt(d.total_actividades));
+        const exercises = chartData.map(d => parseInt(d.ejercicios));
+        const calories = chartData.map(d => parseInt(d.total_calorias) || 0);
+
+        const ctx = document.getElementById('weeklyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Total Actividades',
+                        data: activities,
+                        borderColor: '#0d6efd',
+                        backgroundColor: '#0d6efd20',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Ejercicios',
+                        data: exercises,
+                        borderColor: '#198754',
+                        backgroundColor: '#19875420',
+                        fill: false,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

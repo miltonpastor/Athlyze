@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>Athlyze
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="bi bi-house me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/activities">
+                            <i class="bi bi-journal-plus me-1"></i>Actividades
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports">
+                            <i class="bi bi-graph-up me-1"></i>Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/suggestions">
+                            <i class="bi bi-lightbulb me-1"></i>Consejos
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle btn btn-link text-white" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <%= user.nombre %>
+                                <span class="badge bg-secondary ms-1">
+                                    <%= user.plan.toUpperCase() %>
+                                </span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form action="/logout" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="mb-1">
+                    <i class="bi bi-lightbulb text-warning me-2"></i>Consejos Personalizados
+                </h2>
+                <p class="text-muted">Sugerencias basadas en tus patrones de actividad</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <form action="/suggestions/generate" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-stars me-2"></i>Generar Nuevos Consejos
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-flex mb-2">
+                            <i class="bi bi-lightbulb fs-4 text-warning"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">
+                            <%= stats.total %>
+                        </h4>
+                        <p class="text-muted small mb-0">Total Consejos</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-flex mb-2">
+                            <i class="bi bi-heart-pulse fs-4 text-success"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">
+                            <%= stats.ejercicio %>
+                        </h4>
+                        <p class="text-muted small mb-0">Ejercicio</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-2">
+                            <i class="bi bi-egg-fried fs-4 text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">
+                            <%= stats.nutricion %>
+                        </h4>
+                        <p class="text-muted small mb-0">Nutrición</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-flex mb-2">
+                            <i class="bi bi-speedometer2 fs-4 text-info"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">
+                            <%= stats.medidas %>
+                        </h4>
+                        <p class="text-muted small mb-0">Medidas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label for="tipo" class="form-label fw-semibold">Filtrar por tipo</label>
+                                <select class="form-select" id="tipo" name="tipo">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="general" <%=filters.tipo==='general' ? 'selected' : '' %>>General
+                                    </option>
+                                    <option value="ejercicio" <%=filters.tipo==='ejercicio' ? 'selected' : '' %>
+                                        >Ejercicio</option>
+                                    <option value="nutricion" <%=filters.tipo==='nutricion' ? 'selected' : '' %>
+                                        >Nutrición</option>
+                                    <option value="medidas" <%=filters.tipo==='medidas' ? 'selected' : '' %>>Medidas
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-funnel me-1"></i>Filtrar
+                                </button>
+                                <a href="/suggestions" class="btn btn-outline-secondary ms-2">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions List -->
+        <div class="row">
+            <% if (suggestions.length> 0) { %>
+                <% suggestions.forEach((suggestion, index)=> { %>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <% if (suggestion.tipo==='ejercicio' ) { %>
+                                            <div class="bg-success bg-opacity-10 rounded-circle p-2">
+                                                <i class="bi bi-heart-pulse text-success"></i>
+                                            </div>
+                                            <% } else if (suggestion.tipo==='nutricion' ) { %>
+                                                <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                                                    <i class="bi bi-egg-fried text-primary"></i>
+                                                </div>
+                                                <% } else if (suggestion.tipo==='medidas' ) { %>
+                                                    <div class="bg-info bg-opacity-10 rounded-circle p-2">
+                                                        <i class="bi bi-speedometer2 text-info"></i>
+                                                    </div>
+                                                    <% } else { %>
+                                                        <div class="bg-warning bg-opacity-10 rounded-circle p-2">
+                                                            <i class="bi bi-lightbulb text-warning"></i>
+                                                        </div>
+                                                        <% } %>
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span
+                                                class="badge bg-<%= suggestion.tipo === 'ejercicio' ? 'success' : suggestion.tipo === 'nutricion' ? 'primary' : suggestion.tipo === 'medidas' ? 'info' : 'warning' %>">
+                                                <%= suggestion.tipo.charAt(0).toUpperCase() + suggestion.tipo.slice(1)
+                                                    %>
+                                            </span>
+                                            <small class="text-muted">
+                                                <%= new Date(suggestion.fecha).toLocaleDateString('es-ES', {
+                                                    month: 'short' , day: 'numeric' }) %>
+                                            </small>
+                                        </div>
+
+                                        <p class="mb-3">
+                                            <%= suggestion.texto %>
+                                        </p>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-secondary"
+                                                    onclick="shareSuggestion('<%= suggestion.texto %>')">
+                                                    <i class="bi bi-share"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="deleteSuggestion(<%= suggestion.id %>)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+
+                                            <% if (suggestion.leida) { %>
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="bi bi-check me-1"></i>Leído
+                                                </span>
+                                                <% } else { %>
+                                                    <span class="badge bg-primary">
+                                                        <i class="bi bi-star me-1"></i>Nuevo
+                                                    </span>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+
+                        <!-- Pagination -->
+                        <% if (totalPages> 1) { %>
+                            <div class="col-12">
+                                <nav aria-label="Pagination">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                                            <a class="page-link"
+                                                href="?page=<%= currentPage - 1 %>&tipo=<%= filters.tipo %>">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+
+                                        <% for (let i=Math.max(1, currentPage - 2); i <=Math.min(totalPages, currentPage
+                                            + 2); i++) { %>
+                                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                <a class="page-link" href="?page=<%= i %>&tipo=<%= filters.tipo %>">
+                                                    <%= i %>
+                                                </a>
+                                            </li>
+                                            <% } %>
+
+                                                <li
+                                                    class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                                                    <a class="page-link"
+                                                        href="?page=<%= currentPage + 1 %>&tipo=<%= filters.tipo %>">
+                                                        <i class="bi bi-chevron-right"></i>
+                                                    </a>
+                                                </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                            <% } %>
+                                <% } else { %>
+                                    <!-- Empty State -->
+                                    <div class="col-12">
+                                        <div class="text-center py-5">
+                                            <i class="bi bi-lightbulb text-muted" style="font-size: 4rem;"></i>
+                                            <h4 class="mt-3 text-muted">No hay consejos disponibles</h4>
+                                            <p class="text-muted mb-4">
+                                                <% if (filters.tipo) { %>
+                                                    No se encontraron consejos del tipo seleccionado.
+                                                    <br>
+                                                    <a href="/suggestions" class="text-primary">Mostrar todos los
+                                                        consejos</a>
+                                                    <% } else { %>
+                                                        Registra algunas actividades para recibir consejos
+                                                        personalizados.
+                                                        <% } %>
+                                            </p>
+                                            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                                                <a href="/activities/new" class="btn btn-primary btn-lg">
+                                                    <i class="bi bi-plus-circle me-2"></i>Registrar Actividad
+                                                </a>
+                                                <form action="/suggestions/generate" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-warning btn-lg">
+                                                        <i class="bi bi-stars me-2"></i>Generar Consejos
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% } %>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Eliminar Consejo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que quieres eliminar este consejo?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">
+                        <i class="bi bi-trash me-2"></i>Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let suggestionToDelete = null;
+
+        function deleteSuggestion(suggestionId) {
+            suggestionToDelete = suggestionId;
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+
+        document.getElementById('confirmDelete').addEventListener('click', function () {
+            if (suggestionToDelete) {
+                fetch(`/suggestions/${suggestionToDelete}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error al eliminar el consejo');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar el consejo');
+                    });
+            }
+        });
+
+        function shareSuggestion(text) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Consejo de Athlyze',
+                    text: text
+                });
+            } else {
+                // Fallback para navegadores que no soportan Web Share API
+                navigator.clipboard.writeText(text).then(function () {
+                    // Crear toast notification
+                    const toast = document.createElement('div');
+                    toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
+                    toast.style.zIndex = '1080';
+                    toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Consejo copiado al portapapeles
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `;
+                    document.body.appendChild(toast);
+
+                    const bsToast = new bootstrap.Toast(toast);
+                    bsToast.show();
+
+                    toast.addEventListener('hidden.bs.toast', function () {
+                        toast.remove();
+                    });
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

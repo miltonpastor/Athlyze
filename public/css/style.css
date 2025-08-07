@@ -1,0 +1,326 @@
+/* Athlyze Custom Styles */
+
+:root {
+    --primary: #0d6efd;
+    --success: #198754;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --info: #0dcaf0;
+    --light: #f8f9fa;
+    --dark: #212529;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary) 0%, #495057 100%);
+    min-height: 100vh;
+}
+
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+/* Cards */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), #4c84ff);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #0b5ed7, var(--primary));
+    transform: translateY(-1px);
+}
+
+/* Form Controls */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control-lg {
+    padding: 0.75rem 1rem;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.alert-success {
+    background: linear-gradient(45deg, #d1eddd, #a3d9a3);
+    color: #0f5132;
+}
+
+.alert-danger {
+    background: linear-gradient(45deg, #f8d7da, #f1aeb5);
+    color: #721c24;
+}
+
+.alert-info {
+    background: linear-gradient(45deg, #d1ecf1, #abdbe3);
+    color: #055160;
+}
+
+/* Progress Bars */
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    border-radius: 4px;
+}
+
+/* Activity Type Icons */
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.activity-icon.ejercicio {
+    background: rgba(25, 135, 84, 0.1);
+    color: var(--success);
+}
+
+.activity-icon.alimentacion {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning);
+}
+
+.activity-icon.medidas {
+    background: rgba(13, 202, 240, 0.1);
+    color: var(--info);
+}
+
+/* Charts */
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Suggestions */
+.suggestion-card {
+    background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+}
+
+/* Stats Cards */
+.stat-card {
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+    background: var(--light);
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section .display-4 {
+        font-size: 2rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+/* Plan Selection Cards */
+.plan-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.plan-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12);
+}
+
+.plan-card.selected {
+    border-color: var(--primary) !important;
+    background: rgba(13, 110, 253, 0.05);
+}
+
+/* Activity Form */
+.activity-form .form-floating>label {
+    padding-left: 1rem;
+}
+
+/* Reports Page */
+.report-metric {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.report-metric h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.report-metric p {
+    color: #6c757d;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 3rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -1.6rem;
+    top: 0.5rem;
+    width: 1rem;
+    height: 1rem;
+    background: var(--primary);
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background: #1a1a1a;
+        border-color: #444;
+    }
+
+    .form-control {
+        background: #2d2d2d;
+        border-color: #444;
+        color: #fff;
+    }
+
+    .table {
+        color: #fff;
+    }
+
+    .table th {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
