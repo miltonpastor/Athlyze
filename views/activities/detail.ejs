@@ -21,7 +21,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-activity me-2"></i>Athlyze
+                <i class="bi bi-activity me-2"></i>ForgeYou
             </a>
 
             <div class="navbar-nav ms-auto">
@@ -110,8 +110,26 @@
                             </div>
                         </div>
 
-                        <!-- Detailed Information -->
-                        <% if (activity.medidas && Object.keys(JSON.parse(activity.medidas)).length> 0) { %>
+                                                <!-- Detailed Information -->
+                        <% 
+                        let medidasData = null;
+                        if (activity.medidas) {
+                            if (typeof activity.medidas === 'string') {
+                                try {
+                                    medidasData = JSON.parse(activity.medidas);
+                                } catch (e) {
+                                    console.error('Error parsing activity.medidas:', e);
+                                    // En caso de error, se puede optar por un objeto vacío o manejarlo de otra forma
+                                    medidasData = {}; 
+                                }
+                            } else if (typeof activity.medidas === 'object') {
+                                // activity.medidas ya es un objeto, no necesita parseo
+                                medidasData = activity.medidas;
+                            }
+                        }
+                        %>
+
+                        <% if (medidasData && Object.keys(medidasData).length > 0) { %>
                             <div class="card bg-light">
                                 <div class="card-header">
                                     <h5 class="mb-0">
@@ -120,8 +138,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <% const medidas=JSON.parse(activity.medidas); %>
-                                            <% Object.keys(medidas).forEach((key, index)=> { %>
+                                        <% Object.keys(medidasData).forEach((key, index)=> { %>
                                                 <div class="col-md-6 col-lg-4 mb-3">
                                                     <div class="d-flex align-items-center">
                                                         <div class="bg-primary bg-opacity-10 rounded p-2 me-3">
@@ -146,7 +163,7 @@
                                                                 <%= key.replace('_', ' ' ) %>
                                                             </h6>
                                                             <p class="mb-0 fw-semibold text-primary">
-                                                                <%= medidas[key] %>
+                                                                <%= medidasData[key] %>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -155,7 +172,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <% } %>
+                        <% } %>
 
                                 <!-- Action Buttons -->
                                 <div class="d-flex gap-3 mt-4">

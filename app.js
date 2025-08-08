@@ -52,7 +52,7 @@ app.get('/', (req, res) => {
     if (req.session.user) {
         return res.redirect('/dashboard');
     }
-    res.render('index', { title: 'Athlyze - Tu compañero fitness' });
+    res.render('index', { title: 'ForgeYou - Tu compañero fitness' });
 });
 
 // Middleware de manejo de errores 404

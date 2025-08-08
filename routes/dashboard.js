@@ -56,7 +56,7 @@ router.get('/', requireAuth, async (req, res) => {
             FROM activities 
             WHERE user_id = $1 AND fecha >= CURRENT_DATE - INTERVAL '7 days'
             GROUP BY fecha 
-            ORDER BY fecha DESC
+            ORDER BY fecha ASC
         `, [userId]);
 
         const stats = statsResult.rows[0];

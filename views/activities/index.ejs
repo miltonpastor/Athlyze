@@ -21,7 +21,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-activity me-2"></i>Athlyze
+                <i class="bi bi-activity me-2"></i>ForgeYou
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -63,11 +63,6 @@
                                 </span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
                             <li>
                                 <form action="/logout" method="POST" class="d-inline">
                                     <button type="submit" class="dropdown-item">
@@ -184,9 +179,9 @@
                                                             <%= activity.descripcion.length> 60 ? '...' : '' %>
                                                     </div>
                                                     <% if (activity.medidas &&
-                                                        Object.keys(JSON.parse(activity.medidas)).length> 0) { %>
+                                                        Object.keys(activity.medidas).length> 0) { %>
                                                         <small class="text-muted">
-                                                            <% const medidas=JSON.parse(activity.medidas); %>
+                                                            <% const medidas=activity.medidas; %>
                                                                 <% Object.keys(medidas).slice(0, 2).forEach((key,
                                                                     index)=> { %>
                                                                     <%= index> 0 ? ' • ' : '' %><%= key %>: <%=
@@ -200,6 +195,7 @@
                                                                                             <% } %>
                                                         </small>
                                                         <% } %>
+                                                        
                                                 </td>
                                                 <td>
                                                     <div class="fw-semibold">
