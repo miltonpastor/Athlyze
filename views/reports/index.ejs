@@ -23,7 +23,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-activity me-2"></i>Athlyze
+                <i class="bi bi-activity me-2"></i>ForgeYou
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -65,11 +65,6 @@
                                 </span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
                             <li>
                                 <form action="/logout" method="POST" class="d-inline">
                                     <button type="submit" class="dropdown-item">
@@ -229,8 +224,8 @@
                                     <h5 class="mb-0">
                                         <i class="bi bi-trophy me-2"></i>Ejercicios Más Frecuentes
                                     </h5>
-                                    <a href="/reports/exercises" class="btn btn-sm btn-outline-primary">
-                                        Ver detalles
+                                    <a href="/activities" class="btn btn-sm btn-outline-primary">
+                                        Ver Todas las actividades
                                     </a>
                                 </div>
                                 <div class="card-body">
@@ -380,11 +375,11 @@
                     datasets: [{
                         label: 'Peso (kg)',
                         data: weightData.map(d => parseFloat(d.peso)),
-                        borderColor: '#dc3545',
-                        backgroundColor: '#dc354520',
+                        borderColor: '#607D8B',
+                        backgroundColor: '#D5DDE2',
                         fill: true,
                         tension: 0.4,
-                        pointBackgroundColor: '#dc3545',
+                        pointBackgroundColor: '#303E45',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 5
@@ -418,15 +413,15 @@
                         {
                             label: 'Calorías Quemadas',
                             data: dailyData.map(d => parseInt(d.calorias_quemadas) || 0),
-                            borderColor: '#dc3545',
-                            backgroundColor: '#dc354520',
+                            borderColor: '#355FDC',
+                            backgroundColor: 'transparent',
                             fill: true,
                             tension: 0.4
                         },
                         {
                             label: 'Calorías Consumidas',
                             data: dailyData.map(d => parseInt(d.calorias_consumidas) || 0),
-                            borderColor: '#ffc107',
+                            borderColor: '#E04D57',
                             backgroundColor: 'transparent',
                             tension: 0.4
                         }

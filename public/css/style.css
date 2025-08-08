@@ -284,29 +284,6 @@ body {
     border: 2px solid #fff;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .card {
-        background: #1a1a1a;
-        border-color: #444;
-    }
-
-    .form-control {
-        background: #2d2d2d;
-        border-color: #444;
-        color: #fff;
-    }
-
-    .table {
-        color: #fff;
-    }
-
-    .table th {
-        background: #2d2d2d;
-        border-color: #444;
-    }
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
