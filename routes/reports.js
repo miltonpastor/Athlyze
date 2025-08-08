@@ -15,8 +15,7 @@ const requireAuth = (req, res, next) => {
 router.get('/', requireAuth, async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const period = req.query.period || '30'; // días
-
+        const period = req.query.period || '7'; // días
         // Obtener estadísticas generales
         const statsResult = await db.query(`
             SELECT 
@@ -28,7 +27,7 @@ router.get('/', requireAuth, async (req, res) => {
                 SUM(CASE WHEN tipo = 'ejercicio' AND calorias IS NOT NULL THEN calorias ELSE 0 END) as total_calorias_quemadas,
                 SUM(CASE WHEN tipo = 'alimentacion' AND calorias IS NOT NULL THEN calorias ELSE 0 END) as total_calorias_consumidas
             FROM activities 
-            WHERE user_id = $1 AND fecha >= CURRENT_DATE - INTERVAL '${period} days'
+            WHERE user_id = $1 AND fecha >= CURRENT_DATE - INTERVAL '${period} day'
         `, [userId]);
 
         // Datos para gráfico de actividades por día
