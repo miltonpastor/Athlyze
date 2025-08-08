@@ -1,4 +1,4 @@
-# Athlyze 🏃‍♂️
+# Athlyze 
 
 **Tu compañero para una vida más saludable**
 
