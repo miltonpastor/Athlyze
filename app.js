@@ -9,6 +9,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const activitiesRoutes = require('./routes/activities');
 const reportsRoutes = require('./routes/reports');
 const suggestionsRoutes = require('./routes/suggestions');
+const trainingRoutes = require('./routes/training');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,6 +47,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/activities', activitiesRoutes);
 app.use('/reports', reportsRoutes);
 app.use('/suggestions', suggestionsRoutes);
+app.use('/training', trainingRoutes);
 
 // Ruta principal
 app.get('/', (req, res) => {

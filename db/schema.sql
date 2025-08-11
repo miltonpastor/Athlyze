@@ -57,4 +57,17 @@ INSERT INTO activities (user_id, tipo, descripcion, fecha, calorias, medidas) VA
 (1, 'alimentacion', 'Desayuno: Avena con frutas', '2024-01-15', 280, '{"proteinas": "8g", "carbohidratos": "45g"}'),
 (1, 'medidas', 'Peso corporal', '2024-01-15', NULL, '{"peso": "70kg", "altura": "175cm"}'),
 (1, 'ejercicio', 'Entrenamiento de fuerza - Pecho y tríceps', '2024-01-16', 420, '{"series": 4, "repeticiones": "8-12"}'),
-(1, 'alimentacion', 'Almuerzo: Pollo con ensalada', '2024-01-16', 450, '{"proteinas": "35g", "carbohidratos": "20g"}')
+(1, 'alimentacion', 'Almuerzo: Pollo con ensalada', '2024-01-16', 450, '{"proteinas": "35g", "carbohidratos": "20g"}');
+
+-- Tabla de objetivos y perfil del usuario
+CREATE TABLE user_goals (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    fitness_level VARCHAR(50) NOT NULL CHECK (fitness_level IN ('principiante', 'intermedio', 'avanzado')),
+    main_goal VARCHAR(50) NOT NULL CHECK (main_goal IN ('perder_peso', 'ganar_musculo', 'mejorar_resistencia', 'mantener_forma')),
+    training_days_per_week INTEGER NOT NULL CHECK (training_days_per_week BETWEEN 1 AND 7),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índice para la tabla de objetivos
+CREATE INDEX idx_user_goals_user_id ON user_goals(user_id);

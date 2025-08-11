@@ -102,6 +102,30 @@
             </div>
         </div>
 
+        <!-- Personalized Training CTA -->
+        <% if (user.plan === 'smart' || user.plan === 'pro') { %>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm bg-info">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-gem text-white fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h4 class="text-white mb-1">¡Personaliza tu Entrenamiento!</h4>
+                                <p class="text-white mb-2">Accede a nuestra herramienta de IA para crear un plan de entrenamiento a tu medida.</p>
+                            </div>
+                            <div>
+                                <a href="/training/setup" class="btn btn-light btn-lg fw-bold personalized-training-button">Crear Mi Plan</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
         <!-- Statistics Cards -->
         <div class="row mb-4">
             <!-- Centrar el titulo en la parte superior de la columna -->
