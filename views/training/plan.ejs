@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>ForgeYou
+            </a>
+
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">← Volver a Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+<div class="container mt-5">
+
+  <!-- Título y Botón para reconfigurar -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-calendar-week"></i> Tu Plan de Entrenamiento</h2>
+    <a href="/training/setup" class="btn btn-secondary"><i class="bi bi-pencil-square"></i> Cambiar mis Objetivos</a>
+  </div>
+
+  <!-- Descripción del Plan -->
+  <div class="alert alert-info">
+    <strong><%= plan.title %></strong><br>
+    <%= plan.description %>
+  </div>
+
+  <!-- Horario del Entrenamiento -->
+  <div class="accordion" id="trainingPlanAccordion">
+    <% plan.schedule.forEach((day, index) => { %>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading<%= index %>">
+          <button class="accordion-button <% if(index !== 0) { %>collapsed<% } %>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= index %>" aria-expanded="<% if(index === 0) { %>true<% } else { %>false<% } %>" aria-controls="collapse<%= index %>">
+            <strong><%= day.day %>: <%= day.routine.name %></strong>
+          </button>
+        </h2>
+        <div id="collapse<%= index %>" class="accordion-collapse collapse <% if(index === 0) { %>show<% } %>" aria-labelledby="heading<%= index %>" data-bs-parent="#trainingPlanAccordion">
+          <div class="accordion-body">
+            <p><%= day.routine.description %></p>
+            <% if (day.routine.exercises && day.routine.exercises.length > 0) { %>
+              <div class="row">
+                <% day.routine.exercises.forEach(exercise => { %>
+                  <div class="col-md-12 mb-3">
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title"><%= exercise.name %></h5>
+                        <p class="card-text"><%= exercise.description %></p>
+                        <ul class="list-group list-group-flush">
+                          <li class="list-group-item"><strong><i class="bi bi-bar-chart-steps"></i> Sets:</strong> <%= exercise.sets %></li>
+                          <li class="list-group-item"><strong><i class="bi bi-arrow-repeat"></i> Repeticiones:</strong> <%= exercise.reps %></li>
+                          <li class="list-group-item"><strong><i class="bi bi-clock-history"></i> Descanso:</strong> <%= exercise.rest_period_seconds %> segundos</li>
+                          <li class="list-group-item"><strong><i class="bi bi-person-workspace"></i> Grupo Muscular:</strong> <%= exercise.muscle_group %></li>
+                          <li class="list-group-item"><strong><i class="bi bi-tools"></i> Equipamiento:</strong> <%= exercise.equipment_needed %></li>
+                          <li class="list-group-item"><strong><i class="bi bi-graph-up"></i> Dificultad:</strong> <%= exercise.difficulty_level %></li>
+                        </ul>
+                        <% if (exercise.video_url && exercise.video_url !== '#') { %>
+                          <a href="<%= exercise.video_url %>" class="btn btn-primary mt-3" target="_blank"><i class="bi bi-play-circle-fill"></i> Ver Video</a>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+
+  <!-- Nota Adicional -->
+  <div class="alert alert-light mt-4">
+    <i class="bi bi-info-circle"></i> <strong>Recuerda:</strong> Escucha a tu cuerpo. El descanso es tan importante como el entrenamiento. Asegúrate de calentar antes de cada sesión y estirar al finalizar.
+  </div>
+
+</div>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>ForgeYou
+            </a>
+
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">← Volver a Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h4><i class="fas fa-bullseye"></i> <%= title %></h4>
+        </div>
+        <div class="card-body">
+          <p class="card-text">Para generar un plan de entrenamiento personalizado, necesitamos conocer tus objetivos y tu nivel actual. Completa el siguiente formulario.</p>
+          
+          <form action="/training/generate" method="POST">
+            
+            <!-- Nivel de Condición Física -->
+            <div class="mb-3">
+              <label for="fitness_level" class="form-label"><strong>Nivel de Condición Física</strong></label>
+              <select class="form-select" id="fitness_level" name="fitness_level" required>
+                <option value="principiante" <%= (userGoals && userGoals.fitness_level === 'principiante') ? 'selected' : '' %>>Principiante</option>
+                <option value="intermedio" <%= (userGoals && userGoals.fitness_level === 'intermedio') ? 'selected' : '' %>>Intermedio</option>
+                <option value="avanzado" <%= (userGoals && userGoals.fitness_level === 'avanzado') ? 'selected' : '' %>>Avanzado</option>
+              </select>
+            </div>
+
+            <!-- Objetivo Principal -->
+            <div class="mb-3">
+              <label for="main_goal" class="form-label"><strong>Objetivo Principal</strong></label>
+              <select class="form-select" id="main_goal" name="main_goal" required>
+                <option value="perder_peso" <%= (userGoals && userGoals.main_goal === 'perder_peso') ? 'selected' : '' %>>Perder Peso</option>
+                <option value="ganar_musculo" <%= (userGoals && userGoals.main_goal === 'ganar_musculo') ? 'selected' : '' %>>Ganar Masa Muscular</option>
+                <option value="mejorar_resistencia" <%= (userGoals && userGoals.main_goal === 'mejorar_resistencia') ? 'selected' : '' %>>Mejorar Resistencia</option>
+                <option value="mantener_forma" <%= (userGoals && userGoals.main_goal === 'mantener_forma') ? 'selected' : '' %>>Mantener la Forma Física</option>
+              </select>
+            </div>
+
+            <!-- Días de Entrenamiento por Semana -->
+            <div class="mb-3">
+              <label for="training_days_per_week" class="form-label"><strong>Días de Entrenamiento por Semana</strong></label>
+              <input type="number" class="form-control" id="training_days_per_week" name="training_days_per_week" min="1" max="7" value="<%= (userGoals && userGoals.training_days_per_week) ? userGoals.training_days_per_week : 3 %>" required>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg">Generar Mi Plan <i class="fas fa-cogs"></i></button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
