@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-activity me-2"></i>ForgeYou
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">
+                            <i class="bi bi-house me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/activities">
+                            <i class="bi bi-journal-plus me-1"></i>Actividades
+                        </a>
+                    </li>
+                    <% if (user.plan==='smart' || user.plan==='pro' ) { %>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/nutrition">
+                                <i class="bi bi-apple me-1"></i>Nutrición
+                            </a>
+                        </li>
+                        <% } %>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/reports">
+                                    <i class="bi bi-graph-up me-1"></i>Reportes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/suggestions">
+                                    <i class="bi bi-lightbulb me-1"></i>Consejos
+                                </a>
+                            </li>
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <button class="nav-link dropdown-toggle btn btn-link text-white" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <%= user.nombre %>
+                                <span class="badge bg-secondary ms-1">
+                                    <%= user.plan.toUpperCase() %>
+                                </span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form action="/logout" method="POST" class="d-inline">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-apple fs-2 text-success me-3"></i>
+                    <div>
+                        <h2 class="mb-1">Configuración Nutricional</h2>
+                        <p class="text-muted mb-0">
+                            Personaliza tu plan alimenticio según tus objetivos y preferencias
+                            <span class="badge bg-warning ms-2">Plan Smart</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Progress Steps -->
+                <div class="card bg-light border-0 mb-4">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="step-item">
+                                    <div
+                                        class="step-number bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        1
+                                    </div>
+                                    <div class="step-title fw-semibold mt-2">Perfil Nutricional</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="step-item">
+                                    <div
+                                        class="step-number bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        2
+                                    </div>
+                                    <div class="step-title text-muted mt-2">Generar Plan</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="step-item">
+                                    <div
+                                        class="step-number bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center">
+                                        3
+                                    </div>
+                                    <div class="step-title text-muted mt-2">Plan Personalizado</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Form -->
+        <form action="/nutrition/generate" method="POST" id="nutritionForm">
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Basic Information -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-target me-2"></i>Información Básica
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="goal" class="form-label fw-semibold">
+                                        <i class="bi bi-bullseye me-1"></i>Objetivo Principal
+                                    </label>
+                                    <select class="form-select" id="goal" name="goal" required>
+                                        <option value="">Selecciona tu objetivo</option>
+                                        <option value="perder_peso" <%=profile && profile.goal==='perder_peso'
+                                            ? 'selected' : '' %>>
+                                            Perder peso
+                                        </option>
+                                        <option value="ganar_musculo" <%=profile && profile.goal==='ganar_musculo'
+                                            ? 'selected' : '' %>>
+                                            Ganar músculo
+                                        </option>
+                                        <option value="mantener_forma" <%=profile && profile.goal==='mantener_forma'
+                                            ? 'selected' : '' %>>
+                                            Mantener forma actual
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="daily_calories" class="form-label fw-semibold">
+                                        <i class="bi bi-lightning me-1"></i>Calorías Diarias Objetivo
+                                    </label>
+                                    <input type="number" class="form-control" id="daily_calories" name="daily_calories"
+                                        min="1000" max="4000" step="50" required
+                                        value="<%= profile ? profile.daily_calories : 2000 %>">
+                                    <div class="form-text">Entre 1000 - 4000 calorías</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="meals_per_day" class="form-label fw-semibold">
+                                        <i class="bi bi-clock me-1"></i>Comidas por Día
+                                    </label>
+                                    <select class="form-select" id="meals_per_day" name="meals_per_day" required>
+                                        <option value="3" <%=profile && profile.meals_per_day===3 ? 'selected' : '' %>>
+                                            3 comidas (Desayuno, Almuerzo, Cena)
+                                        </option>
+                                        <option value="4" <%=profile && profile.meals_per_day===4 ? 'selected' : '' %>>
+                                            4 comidas (+ 1 snack)
+                                        </option>
+                                        <option value="5" <%=profile && profile.meals_per_day===5 ? 'selected' : '' %>>
+                                            5 comidas (+ 2 snacks)
+                                        </option>
+                                        <option value="6" <%=profile && profile.meals_per_day===6 ? 'selected' : '' %>>
+                                            6 comidas (+ 3 snacks)
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="activity_level" class="form-label fw-semibold">
+                                        <i class="bi bi-activity me-1"></i>Nivel de Actividad
+                                    </label>
+                                    <select class="form-select" id="activity_level" name="activity_level" required>
+                                        <option value="sedentario" <%=profile && profile.activity_level==='sedentario'
+                                            ? 'selected' : '' %>>
+                                            Sedentario (poco o ningún ejercicio)
+                                        </option>
+                                        <option value="ligero" <%=profile && profile.activity_level==='ligero'
+                                            ? 'selected' : '' %>>
+                                            Ligero (ejercicio ligero 1-3 días/semana)
+                                        </option>
+                                        <option value="moderado" <%=profile && profile.activity_level==='moderado'
+                                            ? 'selected' : '' %>>
+                                            Moderado (ejercicio moderado 3-5 días/semana)
+                                        </option>
+                                        <option value="intenso" <%=profile && profile.activity_level==='intenso'
+                                            ? 'selected' : '' %>>
+                                            Intenso (ejercicio intenso 6-7 días/semana)
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dietary Preferences -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield-check me-2"></i>Preferencias y Restricciones
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-exclamation-triangle me-1"></i>Restricciones Dietéticas
+                                    </label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="dietary_restrictions"
+                                            value="vegetariano" id="vegetarian">
+                                        <label class="form-check-label" for="vegetarian">
+                                            Vegetariano
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="dietary_restrictions"
+                                            value="vegano" id="vegan">
+                                        <label class="form-check-label" for="vegan">
+                                            Vegano
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="dietary_restrictions"
+                                            value="sin_gluten" id="gluten_free">
+                                        <label class="form-check-label" for="gluten_free">
+                                            Sin gluten
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="dietary_restrictions"
+                                            value="sin_lacteos" id="dairy_free">
+                                        <label class="form-check-label" for="dairy_free">
+                                            Sin lácteos
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="allergies" class="form-label fw-semibold">
+                                        <i class="bi bi-x-circle me-1"></i>Alergias Alimentarias
+                                    </label>
+                                    <textarea class="form-control" id="allergies" name="allergies" rows="4"
+                                        placeholder="Ejemplo: nueces, mariscos, huevos, soja..."><%
+                                        if (profile && profile.allergies) {
+                                            try {
+                                                // Si ya es un string, usarlo directamente
+                                                if (typeof profile.allergies === 'string') {
+                                                    const allergiesArray = JSON.parse(profile.allergies);
+                                                    if (Array.isArray(allergiesArray)) {
+                                                        %><%= allergiesArray.join(', ') %><%
+                                                    } else {
+                                                        // Si no es array válido, limpiar duplicados
+                                                        const cleanAllergies = profile.allergies.split(',')
+                                                            .map(item => item.trim())
+                                                            .filter((item, index, arr) => item && arr.indexOf(item) === index);
+                                                        %><%= cleanAllergies.join(', ') %><%
+                                                    }
+                                                } else if (Array.isArray(profile.allergies)) {
+                                                    %><%= profile.allergies.join(', ') %><%
+                                                } else {
+                                                    %><%= profile.allergies %><%
+                                                }
+                                            } catch(e) {
+                                                // Si falla el parsing, limpiar duplicados manualmente
+                                                const cleanAllergies = String(profile.allergies).split(',')
+                                                    .map(item => item.trim())
+                                                    .filter((item, index, arr) => item && arr.indexOf(item) === index);
+                                                %><%= cleanAllergies.join(', ') %><%
+                                            }
+                                        }
+                                    %></textarea>
+                                    <div class="form-text">Separa múltiples alergias con comas</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Food Preferences -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="bi bi-heart me-2"></i>Preferencias Alimentarias
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="preferred_foods" class="form-label fw-semibold">
+                                        <i class="bi bi-hand-thumbs-up me-1"></i>Alimentos Favoritos
+                                    </label>
+                                    <textarea class="form-control" id="preferred_foods" name="preferred_foods" rows="3"
+                                        placeholder="Ejemplo: pollo, salmón, aguacate, quinoa..."><%
+                                        if (profile && profile.preferred_foods) {
+                                            try {
+                                                if (typeof profile.preferred_foods === 'string') {
+                                                    const preferredArray = JSON.parse(profile.preferred_foods);
+                                                    if (Array.isArray(preferredArray)) {
+                                                        %><%= preferredArray.join(', ') %><%
+                                                    } else {
+                                                        const cleanPreferred = profile.preferred_foods.split(',')
+                                                            .map(item => item.trim())
+                                                            .filter((item, index, arr) => item && arr.indexOf(item) === index);
+                                                        %><%= cleanPreferred.join(', ') %><%
+                                                    }
+                                                } else if (Array.isArray(profile.preferred_foods)) {
+                                                    %><%= profile.preferred_foods.join(', ') %><%
+                                                } else {
+                                                    %><%= profile.preferred_foods %><%
+                                                }
+                                            } catch(e) {
+                                                const cleanPreferred = String(profile.preferred_foods).split(',')
+                                                    .map(item => item.trim())
+                                                    .filter((item, index, arr) => item && arr.indexOf(item) === index);
+                                                %><%= cleanPreferred.join(', ') %><%
+                                            }
+                                        }
+                                    %></textarea>
+                                    <div class="form-text">Alimentos que te gusta incluir en tu dieta</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="disliked_foods" class="form-label fw-semibold">
+                                        <i class="bi bi-hand-thumbs-down me-1"></i>Alimentos que Evitas
+                                    </label>
+                                    <textarea class="form-control" id="disliked_foods" name="disliked_foods" rows="3"
+                                        placeholder="Ejemplo: brócoli, pescado, espinacas..."><%
+                                        if (profile && profile.disliked_foods) {
+                                            try {
+                                                if (typeof profile.disliked_foods === 'string') {
+                                                    const dislikedArray = JSON.parse(profile.disliked_foods);
+                                                    if (Array.isArray(dislikedArray)) {
+                                                        %><%= dislikedArray.join(', ') %><%
+                                                    } else {
+                                                        const cleanDisliked = profile.disliked_foods.split(',')
+                                                            .map(item => item.trim())
+                                                            .filter((item, index, arr) => item && arr.indexOf(item) === index);
+                                                        %><%= cleanDisliked.join(', ') %><%
+                                                    }
+                                                } else if (Array.isArray(profile.disliked_foods)) {
+                                                    %><%= profile.disliked_foods.join(', ') %><%
+                                                } else {
+                                                    %><%= profile.disliked_foods %><%
+                                                }
+                                            } catch(e) {
+                                                const cleanDisliked = String(profile.disliked_foods).split(',')
+                                                    .map(item => item.trim())
+                                                    .filter((item, index, arr) => item && arr.indexOf(item) === index);
+                                                %><%= cleanDisliked.join(', ') %><%
+                                            }
+                                        }
+                                    %></textarea>
+                                    <div class="form-text">Alimentos que prefieres evitar (no alergias)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Quick Tips -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-lightbulb me-2"></i>Consejos Nutricionales
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-success">Para Perder Peso:</h6>
+                                <small class="text-muted">
+                                    • Déficit calórico de 300-500 cal/día<br>
+                                    • Mayor proporción de proteína<br>
+                                    • 3-4 comidas estructuradas
+                                </small>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="text-primary">Para Ganar Músculo:</h6>
+                                <small class="text-muted">
+                                    • Superávit calórico de 200-400 cal/día<br>
+                                    • 1.6-2.2g proteína por kg peso<br>
+                                    • 4-6 comidas distribuidas
+                                </small>
+                            </div>
+                            <div>
+                                <h6 class="text-warning">Para Mantener Forma:</h6>
+                                <small class="text-muted">
+                                    • Calorías de mantenimiento<br>
+                                    • Balance 30% proteína, 40% carbs, 30% grasas<br>
+                                    • Flexibilidad en horarios
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Profile -->
+                    <% if (profile) { %>
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="bi bi-person-check me-2"></i>Perfil Actual
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-2">
+                                    <strong>Objetivo:</strong>
+                                    <span class="text-capitalize">
+                                        <%= profile.goal.replace('_', ' ' ) %>
+                                    </span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Calorías:</strong>
+                                    <%= profile.daily_calories %> cal/día
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Comidas:</strong>
+                                    <%= profile.meals_per_day %> por día
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Actividad:</strong>
+                                    <span class="text-capitalize">
+                                        <%= profile.activity_level %>
+                                    </span>
+                                </p>
+                                <hr>
+                                <div class="d-grid">
+                                    <a href="/nutrition/plan" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i>Ver Plan Actual
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <!-- Generate Button -->
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-magic fs-1 text-primary mb-3"></i>
+                                    <h5>Generar Plan Personalizado</h5>
+                                    <p class="text-muted mb-4">
+                                        Nuestra IA creará un plan alimenticio único para ti
+                                    </p>
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="bi bi-stars me-2"></i>Crear Mi Plan
+                                    </button>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Form validation and enhancement
+        document.getElementById('nutritionForm').addEventListener('submit', function (e) {
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando Plan...';
+            submitBtn.disabled = true;
+
+            // Convert text areas to arrays for allergies and preferences
+            const allergiesText = document.getElementById('allergies').value;
+            const preferredText = document.getElementById('preferred_foods').value;
+            const dislikedText = document.getElementById('disliked_foods').value;
+
+            // Clear existing textareas to avoid duplication
+            document.getElementById('allergies').value = '';
+            document.getElementById('preferred_foods').value = '';
+            document.getElementById('disliked_foods').value = '';
+
+            // Create hidden inputs for arrays with deduplication
+            if (allergiesText.trim()) {
+                const allergiesArray = allergiesText.split(',')
+                    .map(item => item.trim())
+                    .filter((item, index, arr) => item && arr.indexOf(item) === index); // Remove duplicates
+                allergiesArray.forEach(allergy => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'allergies';
+                    input.value = allergy;
+                    this.appendChild(input);
+                });
+            }
+
+            if (preferredText.trim()) {
+                const preferredArray = preferredText.split(',')
+                    .map(item => item.trim())
+                    .filter((item, index, arr) => item && arr.indexOf(item) === index); // Remove duplicates
+                preferredArray.forEach(food => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'preferred_foods';
+                    input.value = food;
+                    this.appendChild(input);
+                });
+            }
+
+            if (dislikedText.trim()) {
+                const dislikedArray = dislikedText.split(',')
+                    .map(item => item.trim())
+                    .filter((item, index, arr) => item && arr.indexOf(item) === index); // Remove duplicates
+                dislikedArray.forEach(food => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'disliked_foods';
+                    input.value = food;
+                    this.appendChild(input);
+                });
+            }
+        });
+
+        // Calorie recommendation based on goal
+        document.getElementById('goal').addEventListener('change', function () {
+            const calorieInput = document.getElementById('daily_calories');
+            const activityLevel = document.getElementById('activity_level').value;
+
+            let baseCalories = 2000;
+            switch (this.value) {
+                case 'perder_peso':
+                    baseCalories = 1600;
+                    break;
+                case 'ganar_musculo':
+                    baseCalories = 2400;
+                    break;
+                case 'mantener_forma':
+                    baseCalories = 2000;
+                    break;
+            }
+
+            // Adjust for activity level
+            const multipliers = {
+                'sedentario': 1.0,
+                'ligero': 1.1,
+                'moderado': 1.2,
+                'intenso': 1.3
+            };
+
+            if (activityLevel && multipliers[activityLevel]) {
+                baseCalories = Math.round(baseCalories * multipliers[activityLevel]);
+            }
+
+            calorieInput.value = baseCalories;
+        });
+
+        // Activity level changes
+        document.getElementById('activity_level').addEventListener('change', function () {
+            // Trigger goal change to recalculate calories
+            document.getElementById('goal').dispatchEvent(new Event('change'));
+        });
+    </script>
+
+    <style>
+        .step-number {
+            width: 40px;
+            height: 40px;
+            font-weight: bold;
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+        }
+
+        .form-check {
+            padding: 0.375rem 0;
+        }
+
+        .card-header h5,
+        .card-header h6 {
+            font-weight: 600;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+        }
+
+        .bg-info {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
+        }
+
+        .bg-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+        }
+    </style>
+</body>
+
+</html>
