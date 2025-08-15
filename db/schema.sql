@@ -349,3 +349,92 @@ INSERT INTO workout_routines (name, description, goal, fitness_level, duration_m
 ('Mantenimiento General', 'Rutina balanceada para mantener condición', 'mantener_forma', 'intermedio', 35, '[{"exercise_id": 2, "sets": 3, "reps": "15 min", "rest_seconds": 0}, {"exercise_id": 6, "sets": 3, "reps": "10", "rest_seconds": 45}]'),
 
 ('Movilidad y Fuerza', 'Combinación de flexibilidad y fortalecimiento', 'mantener_forma', 'principiante', 25, '[{"exercise_id": 10, "sets": 1, "reps": "10 min", "rest_seconds": 0}, {"exercise_id": 11, "sets": 1, "reps": "10 min", "rest_seconds": 0}]');
+
+-- Tabla de medidas corporales del usuario (obligatorias para evaluación)
+CREATE TABLE user_measurements (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    measurement_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    weight DECIMAL(5,2), -- Peso en kg
+    body_fat_percentage DECIMAL(4,2), -- Porcentaje de grasa corporal
+    muscle_mass DECIMAL(5,2), -- Masa muscular en kg
+    waist_circumference DECIMAL(4,1), -- Circunferencia de cintura en cm
+    chest_circumference DECIMAL(4,1), -- Circunferencia de pecho en cm
+    arm_circumference DECIMAL(4,1), -- Circunferencia de brazo en cm
+    thigh_circumference DECIMAL(4,1), -- Circunferencia de muslo en cm
+    resting_heart_rate INTEGER, -- Frecuencia cardíaca en reposo
+    blood_pressure_systolic INTEGER, -- Presión arterial sistólica
+    blood_pressure_diastolic INTEGER, -- Presión arterial diastólica
+    notes TEXT, -- Notas adicionales
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de evaluaciones de progreso automáticas
+CREATE TABLE progress_evaluations (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    plan_id INTEGER REFERENCES training_plans(id) ON DELETE CASCADE,
+    evaluation_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    evaluation_period_days INTEGER DEFAULT 30, -- Período evaluado (30 días)
+    
+    -- Métricas de progreso
+    weight_change DECIMAL(5,2), -- Cambio de peso en kg
+    body_composition_change JSONB, -- Cambios en composición corporal
+    performance_metrics JSONB, -- Métricas de rendimiento
+    
+    -- Indicadores de estancamiento
+    stagnation_detected BOOLEAN DEFAULT false,
+    stagnation_indicators JSONB, -- Indicadores específicos de estancamiento
+    confidence_score DECIMAL(3,2), -- Puntuación de confianza (0-1)
+    
+    -- Recomendaciones de ajuste
+    adjustment_needed BOOLEAN DEFAULT false,
+    adjustment_type VARCHAR(50), -- 'intensity', 'volume', 'frequency', 'complete_change'
+    adjustment_details JSONB, -- Detalles específicos del ajuste
+    
+    -- Estado de la evaluación
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'processed', 'applied')),
+    user_acknowledged BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP
+);
+
+-- Tabla de adaptaciones de plan implementadas
+CREATE TABLE plan_adaptations (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    original_plan_id INTEGER REFERENCES training_plans(id),
+    new_plan_id INTEGER REFERENCES training_plans(id),
+    evaluation_id INTEGER REFERENCES progress_evaluations(id),
+    adaptation_type VARCHAR(50) NOT NULL, -- Tipo de adaptación
+    adaptation_reason TEXT NOT NULL, -- Razón de la adaptación
+    changes_summary JSONB, -- Resumen de cambios realizados
+    user_feedback TEXT, -- Feedback del usuario sobre la adaptación
+    effectiveness_score INTEGER CHECK (effectiveness_score BETWEEN 1 AND 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de notificaciones de progreso
+CREATE TABLE progress_notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    evaluation_id INTEGER REFERENCES progress_evaluations(id),
+    notification_type VARCHAR(50) NOT NULL, -- 'stagnation_alert', 'adaptation_suggestion', 'progress_milestone'
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    action_required BOOLEAN DEFAULT false,
+    action_url VARCHAR(255),
+    read_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para las nuevas tablas
+CREATE INDEX idx_user_measurements_user_id ON user_measurements(user_id);
+CREATE INDEX idx_user_measurements_date ON user_measurements(measurement_date);
+CREATE INDEX idx_progress_evaluations_user_id ON progress_evaluations(user_id);
+CREATE INDEX idx_progress_evaluations_date ON progress_evaluations(evaluation_date);
+CREATE INDEX idx_progress_evaluations_status ON progress_evaluations(status);
+CREATE INDEX idx_plan_adaptations_user_id ON plan_adaptations(user_id);
+CREATE INDEX idx_plan_adaptations_date ON plan_adaptations(created_at);
+CREATE INDEX idx_progress_notifications_user_id ON progress_notifications(user_id);
+CREATE INDEX idx_progress_notifications_read ON progress_notifications(read_at);

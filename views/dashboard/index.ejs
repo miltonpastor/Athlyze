@@ -159,6 +159,42 @@
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm bg-info">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-graph-up-arrow text-white fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="text-white mb-1">Evaluación de Progreso</h5>
+                                <p class="text-white mb-2 small">Analiza tu progreso y recibe adaptaciones automáticas de tu plan.</p>
+                            </div>
+                            <div>
+                                <a href="/progress/adaptations" class="btn btn-light fw-bold">Evaluar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm bg-warning">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="bi bi-ruler text-white fs-2"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="text-white mb-1">Registro de Medidas</h5>
+                                <p class="text-white mb-2 small">Registra tus medidas corporales para un seguimiento preciso.</p>
+                            </div>
+                            <div>
+                                <button class="btn btn-light fw-bold" onclick="showMeasurementsModal()">Registrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <% } %>
 
@@ -416,6 +452,146 @@
                 }
             }
         });
+    </script>
+
+    <!-- Modal para Registrar Medidas -->
+    <div class="modal fade" id="measurementsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-ruler me-2"></i>
+                        Registrar Medidas Corporales
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="measurementsForm">
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Importante:</strong> El registro regular de medidas es esencial para el sistema de adaptación automática de tu plan.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="weight" class="form-label">Peso (kg) *</label>
+                                    <input type="number" step="0.1" class="form-control" id="weight" name="weight" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="body_fat_percentage" class="form-label">% Grasa Corporal</label>
+                                    <input type="number" step="0.1" class="form-control" id="body_fat_percentage" name="body_fat_percentage">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="muscle_mass" class="form-label">Masa Muscular (kg)</label>
+                                    <input type="number" step="0.1" class="form-control" id="muscle_mass" name="muscle_mass">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="waist_circumference" class="form-label">Cintura (cm)</label>
+                                    <input type="number" step="0.1" class="form-control" id="waist_circumference" name="waist_circumference">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="chest_circumference" class="form-label">Pecho (cm)</label>
+                                    <input type="number" step="0.1" class="form-control" id="chest_circumference" name="chest_circumference">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="resting_heart_rate" class="form-label">FC Reposo (bpm)</label>
+                                    <input type="number" class="form-control" id="resting_heart_rate" name="resting_heart_rate">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label">Notas Adicionales</label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Ej: Me siento más fuerte esta semana, he notado mejoras en resistencia..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>Guardar Medidas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar modal de medidas
+        function showMeasurementsModal() {
+            const modal = new bootstrap.Modal(document.getElementById('measurementsModal'));
+            modal.show();
+        }
+
+        // Manejar envío del formulario de medidas
+        document.getElementById('measurementsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            try {
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
+                submitBtn.disabled = true;
+
+                const response = await fetch('/progress/measurements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Medidas registradas correctamente. ¡Excelente trabajo!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('measurementsModal')).hide();
+                    this.reset();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error al registrar medidas: ' + error.message, 'danger');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Función para mostrar notificaciones
+        function showNotification(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1055; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
     </script>
 </body>
 
