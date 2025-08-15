@@ -40,12 +40,51 @@ CREATE TABLE suggestions (
     tipo VARCHAR(20) DEFAULT 'general' CHECK (tipo IN ('general', 'ejercicio', 'nutricion', 'medidas'))
 );
 
+-- Tabla de objetivos de entrenamiento (para Plan Smart/Pro)
+CREATE TABLE user_goals (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    fitness_level VARCHAR(20) CHECK (fitness_level IN ('principiante', 'intermedio', 'avanzado')),
+    main_goal VARCHAR(30) CHECK (main_goal IN ('perder_peso', 'ganar_musculo', 'mejorar_resistencia', 'mantener_forma')),
+    training_days_per_week INTEGER CHECK (training_days_per_week >= 1 AND training_days_per_week <= 7),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de perfiles nutricionales (para Plan Smart/Pro)
+CREATE TABLE nutrition_profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    goal VARCHAR(30) CHECK (goal IN ('perder_peso', 'ganar_musculo', 'mantener_forma')),
+    daily_calories INTEGER CHECK (daily_calories >= 1000 AND daily_calories <= 4000),
+    meals_per_day INTEGER CHECK (meals_per_day >= 3 AND meals_per_day <= 6),
+    activity_level VARCHAR(20) CHECK (activity_level IN ('sedentario', 'ligero', 'moderado', 'intenso')),
+    dietary_restrictions JSONB DEFAULT '[]',
+    allergies JSONB DEFAULT '[]',
+    preferred_foods JSONB DEFAULT '[]',
+    disliked_foods JSONB DEFAULT '[]',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla de planes nutricionales generados
+CREATE TABLE nutrition_plans (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    plan_data JSONB NOT NULL,
+    goal VARCHAR(30),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Índices para mejorar el rendimiento
 CREATE INDEX idx_activities_user_id ON activities(user_id);
 CREATE INDEX idx_activities_fecha ON activities(fecha);
 CREATE INDEX idx_activities_tipo ON activities(tipo);
 CREATE INDEX idx_suggestions_user_id ON suggestions(user_id);
 CREATE INDEX idx_suggestions_leida ON suggestions(leida);
+CREATE INDEX idx_user_goals_user_id ON user_goals(user_id);
+CREATE INDEX idx_nutrition_profiles_user_id ON nutrition_profiles(user_id);
+CREATE INDEX idx_nutrition_plans_user_id ON nutrition_plans(user_id);
+CREATE INDEX idx_nutrition_plans_created_at ON nutrition_plans(created_at);
 
 -- Tabla de objetivos y perfil del usuario para ejercicio
 CREATE TABLE user_goals_exercise (
