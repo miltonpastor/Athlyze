@@ -32,16 +32,41 @@
 
 <div class="container mt-5">
 
-  <!-- Título y Botón para reconfigurar -->
+  <!-- Título y Botones -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-calendar-week"></i> Tu Plan de Entrenamiento</h2>
-    <a href="/training/setup" class="btn btn-secondary"><i class="bi bi-pencil-square"></i> Cambiar mis Objetivos</a>
+    <div>
+      <button class="btn btn-info me-2" onclick="location.href='/reports'">
+        <i class="bi bi-graph-up"></i> Ver Progreso
+      </button>
+      <a href="/training/setup" class="btn btn-secondary">
+        <i class="bi bi-pencil-square"></i> Cambiar Objetivos
+      </a>
+    </div>
   </div>
 
   <!-- Descripción del Plan -->
   <div class="alert alert-info">
-    <strong><%= plan.title %></strong><br>
+    <strong><i class="bi bi-info-circle-fill"></i> <%= plan.title %></strong><br>
     <%= plan.description %>
+    <% if (plan.userMetrics) { %>
+    <hr>
+    <div class="row mt-3">
+      <div class="col-md-3">
+        <strong>BMI:</strong> <%= plan.userMetrics.bmi.toFixed(1) %>
+        <small class="text-muted d-block">(<%= plan.userMetrics.bmiCategory %>)</small>
+      </div>
+      <div class="col-md-4">
+        <strong>Calorías por sesión:</strong> <%= plan.userMetrics.recommendedCaloriesPerSession %>
+      </div>
+      <div class="col-md-2">
+        <strong>BMR:</strong> <%= Math.round(plan.userMetrics.bmr) %>
+      </div>
+      <div class="col-md-3">
+        <strong>TDEE:</strong> <%= Math.round(plan.userMetrics.tdee) %>
+      </div>
+    </div>
+    <% } %>
   </div>
 
   <!-- Horario del Entrenamiento -->
@@ -73,7 +98,17 @@
                           <li class="list-group-item"><strong><i class="bi bi-graph-up"></i> Dificultad:</strong> <%= exercise.difficulty_level %></li>
                         </ul>
                         <% if (exercise.video_url && exercise.video_url !== '#') { %>
-                          <a href="<%= exercise.video_url %>" class="btn btn-primary mt-3" target="_blank"><i class="bi bi-play-circle-fill"></i> Ver Video</a>
+                          <a href="<%= exercise.video_url %>" class="btn btn-primary mt-3 me-2" target="_blank">
+                            <i class="bi bi-play-circle-fill"></i> Ver Video
+                          </a>
+                        <% } %>
+                        <button class="btn btn-success mt-3 me-2" onclick="showActivityModal(this, '<%= exercise.name %>', '<%= exercise.sets %>', '<%= exercise.reps %>', '<%= exercise.rest_period_seconds %>', '<%= exercise.muscle_group %>', '<%= exercise.difficulty_level %>')">
+                          <i class="bi bi-check-circle"></i> Completar
+                        </button>
+                        <% if (exercise.instructions && Array.isArray(exercise.instructions) && exercise.instructions.length > 0) { %>
+                          <button class="btn btn-outline-info mt-3" onclick="showInstructions('<%= exercise.name %>', <%= JSON.stringify(exercise.instructions) %>)">
+                            <i class="bi bi-info-circle"></i> Instrucciones
+                          </button>
                         <% } %>
                       </div>
                     </div>
@@ -93,8 +128,470 @@
   </div>
 
 </div>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JavaScript -->
+<script>
+  let currentExerciseData = {};
+  let currentButton = null;
+
+  // Verificar al cargar la página qué ejercicios están bloqueados
+  document.addEventListener('DOMContentLoaded', async function() {
+    console.log('DOM cargado, inicializando...');
+    
+    const today = new Date().toDateString();
+    const progress = JSON.parse(localStorage.getItem('trainingProgress') || '{}');
+    const todaysProgress = progress[today] || [];
+    
+    // Marcar ejercicios completados localmente
+    todaysProgress.forEach(exerciseName => {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        if (button.innerHTML.includes('Completar') && 
+            button.getAttribute('onclick') && 
+            button.getAttribute('onclick').includes(exerciseName)) {
+          markAsCompleted(button, exerciseName);
+        }
+      });
+    });
+
+    // Verificar ejercicios bloqueados por registro en base de datos
+    try {
+      await checkAllExercisesStatus();
+    } catch (error) {
+      console.error('Error al verificar el estado de los ejercicios:', error);
+      // No mostrar error al usuario para no interrumpir la experiencia
+    }
+  });
+
+  // Verificar el estado de todos los ejercicios
+  async function checkAllExercisesStatus() {
+    const exerciseButtons = document.querySelectorAll('button[onclick*="showActivityModal"]');
+    console.log(`Verificando estado de ${exerciseButtons.length} ejercicios...`);
+    
+    for (let button of exerciseButtons) {
+      try {
+        const onclick = button.getAttribute('onclick');
+        if (!onclick) continue;
+        
+        const exerciseNameMatch = onclick.match(/'([^']+)'/);
+        if (!exerciseNameMatch) continue;
+        
+        const exerciseName = exerciseNameMatch[1];
+        
+        const response = await fetch(`/training/check-exercise-status/${encodeURIComponent(exerciseName)}`);
+        
+        if (!response.ok) {
+          console.warn(`Error al verificar ejercicio ${exerciseName}:`, response.status);
+          continue;
+        }
+        
+        const data = await response.json();
+        
+        if (!data.canComplete && data.lastCompletedDate) {
+          // Deshabilitar botón por 5 días
+          button.disabled = true;
+          button.classList.remove('btn-success');
+          button.classList.add('btn-secondary');
+          button.innerHTML = '<i class="bi bi-clock-fill"></i> Completado recientemente';
+          
+          // Agregar tooltip con información
+          const completedDate = new Date(data.lastCompletedDate).toLocaleDateString();
+          button.setAttribute('title', `Último completado: ${completedDate}`);
+          button.setAttribute('data-bs-toggle', 'tooltip');
+        }
+      } catch (error) {
+        console.error('Error verificando estado del ejercicio:', error);
+        // Continuar con el siguiente ejercicio
+      }
+    }
+    
+    // Inicializar tooltips después de verificar todos los ejercicios
+    try {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    } catch (error) {
+      console.error('Error inicializando tooltips:', error);
+    }
+  }
+
+  // Función de debugging para verificar elementos
+  function debugModalElements() {
+    console.log('=== DEBUG MODAL ELEMENTS ===');
+    const elements = [
+      'activityModal',
+      'modalExerciseName', 
+      'modalSets',
+      'modalReps', 
+      'modalRest',
+      'modalMuscleGroup',
+      'activityDate',
+      'registrationSuccess',
+      'registrationError'
+    ];
+    
+    elements.forEach(id => {
+      const element = document.getElementById(id);
+      console.log(`${id}:`, element ? 'FOUND' : 'NOT FOUND');
+    });
+    console.log('=== END DEBUG ===');
+  }
+
+  // Mostrar modal para registrar actividad (versión simplificada)
+  function showActivityModal(button, exerciseName, sets, reps, restPeriod, muscleGroup, difficulty) {
+    console.log('showActivityModal called with:', { exerciseName, sets, reps, restPeriod, muscleGroup, difficulty });
+    
+    // Verificar si el botón está deshabilitado
+    if (button && button.disabled) {
+      showNotification('Este ejercicio ya fue completado recientemente', 'warning');
+      return;
+    }
+
+    currentButton = button;
+    currentExerciseData = {
+      name: exerciseName,
+      sets: sets,
+      reps: reps,
+      restPeriod: restPeriod,
+      muscleGroup: muscleGroup,
+      difficulty: difficulty
+    };
+
+    // Siempre crear modal dinámicamente para evitar problemas de renderizado
+    createAndShowModal();
+  }
+
+  // Crear modal dinámicamente si no existe
+  function createAndShowModal() {
+    console.log('Creando modal dinámicamente...');
+    
+    // Eliminar modal existente si hay uno
+    const existingModal = document.getElementById('activityModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    const modalHTML = `
+    <div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="activityModalLabel">
+              <i class="bi bi-journal-plus"></i> Registrar Actividad
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle"></i>
+              ¿Deseas registrar este ejercicio en tu historial de actividades?
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label"><strong>Ejercicio:</strong></label>
+              <p id="modalExerciseName" class="form-control-plaintext fw-bold">${currentExerciseData.name || 'Ejercicio'}</p>
+            </div>
+            
+            <div class="mb-3">
+              <label for="activityDate" class="form-label">Fecha de realización:</label>
+              <input type="date" class="form-control" id="activityDate" required value="${new Date().toISOString().split('T')[0]}">
+              <div class="form-text">Por defecto se usa la fecha actual</div>
+            </div>
+            
+            <div class="row">
+              <div class="col-6">
+                <label class="form-label"><strong>Sets:</strong></label>
+                <p id="modalSets" class="form-control-plaintext">${currentExerciseData.sets || '3'}</p>
+              </div>
+              <div class="col-6">
+                <label class="form-label"><strong>Repeticiones:</strong></label>
+                <p id="modalReps" class="form-control-plaintext">${currentExerciseData.reps || '12'}</p>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-6">
+                <label class="form-label"><strong>Descanso:</strong></label>
+                <p id="modalRest" class="form-control-plaintext">${currentExerciseData.restPeriod || 60} segundos</p>
+              </div>
+              <div class="col-6">
+                <label class="form-label"><strong>Grupo Muscular:</strong></label>
+                <p id="modalMuscleGroup" class="form-control-plaintext">${currentExerciseData.muscleGroup || 'General'}</p>
+              </div>
+            </div>
+            
+            <div class="alert alert-success d-none" id="registrationSuccess">
+              <i class="bi bi-check-circle-fill"></i> Actividad registrada exitosamente
+            </div>
+            
+            <div class="alert alert-danger d-none" id="registrationError">
+              <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorMessage"></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="confirmRegisterBtn" onclick="registerActivity()">
+              <i class="bi bi-check-lg"></i> Confirmar y Registrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    
+    // Agregar el modal al body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Mostrar el modal inmediatamente
+    setTimeout(() => {
+      const modal = new bootstrap.Modal(document.getElementById('activityModal'));
+      modal.show();
+    }, 50);
+  }
+
+  // Registrar actividad en el servidor
+  async function registerActivity() {
+    const confirmBtn = document.getElementById('confirmRegisterBtn');
+    const originalBtnText = confirmBtn.innerHTML;
+    
+    try {
+      // Mostrar loading
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Registrando...';
+      
+      const activityDate = document.getElementById('activityDate').value;
+      
+      if (!activityDate) {
+        throw new Error('Debes seleccionar una fecha');
+      }
+      
+      const response = await fetch('/training/register-activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          exerciseName: currentExerciseData.name,
+          fecha: activityDate,
+          sets: currentExerciseData.sets,
+          reps: currentExerciseData.reps,
+          restPeriod: currentExerciseData.restPeriod,
+          muscleGroup: currentExerciseData.muscleGroup,
+          difficulty: currentExerciseData.difficulty
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Mostrar éxito
+        document.getElementById('registrationSuccess').classList.remove('d-none');
+        document.getElementById('registrationError').classList.add('d-none');
+        
+        // Marcar como completado y deshabilitar botón
+        markAsCompletedAndDisable(currentButton, currentExerciseData.name, data.estimated_calories, data.duration);
+        
+        // Cerrar modal después de 2 segundos
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('activityModal')).hide();
+          showNotification(`Actividad registrada: ${data.estimated_calories} calorías estimadas`, 'success');
+        }, 2000);
+        
+      } else {
+        throw new Error(data.message || 'Error al registrar la actividad');
+      }
+      
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('registrationError').classList.remove('d-none');
+      document.getElementById('registrationSuccess').classList.add('d-none');
+      document.getElementById('errorMessage').textContent = error.message;
+    } finally {
+      // Restaurar botón
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = originalBtnText;
+    }
+  }
+
+  // Marcar como completado y deshabilitar por 5 días
+  function markAsCompletedAndDisable(button, exerciseName, calories, duration) {
+    // Cambiar apariencia del botón
+    button.disabled = true;
+    button.classList.remove('btn-success');
+    button.classList.add('btn-secondary');
+    button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Registrado';
+    
+    // Agregar efecto visual a la card
+    const card = button.closest('.card');
+    card.style.opacity = '0.8';
+    card.style.border = '2px solid #28a745';
+    
+    // Guardar progreso localmente también
+    saveProgress(exerciseName);
+    
+    // Mostrar información adicional
+    const cardBody = button.closest('.card-body');
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'alert alert-success mt-2';
+    infoDiv.innerHTML = `
+      <small>
+        <i class="bi bi-check-circle-fill"></i> Registrado exitosamente<br>
+        <strong>Calorías:</strong> ${calories} | <strong>Duración:</strong> ${duration} min
+      </small>
+    `;
+    cardBody.appendChild(infoDiv);
+  }
+
+  // Función original mejorada (mantener para compatibilidad local)
+  function markAsCompleted(button, exerciseName) {
+    if (button.disabled) return; // No hacer nada si está deshabilitado
+    
+    if (button.classList.contains('btn-success')) {
+      button.classList.remove('btn-success');
+      button.classList.add('btn-outline-success');
+      button.innerHTML = '<i class="bi bi-check-circle"></i> Completar';
+    } else {
+      button.classList.remove('btn-outline-success');
+      button.classList.add('btn-success');
+      button.innerHTML = '<i class="bi bi-check-circle-fill"></i> Completado';
+      showNotification(`¡Genial! ${exerciseName} completado`, 'success');
+      
+      // Efectos visuales
+      button.closest('.card').style.opacity = '0.7';
+      
+      // Guardar progreso localmente
+      saveProgress(exerciseName);
+    }
+  }
+
+  // Mostrar instrucciones del ejercicio
+  function showInstructions(exerciseName, exerciseInstructions) {
+    // Crear modal dinámico
+    const modalHtml = `
+      <div class="modal fade" id="instructionsModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-info-circle"></i> Instrucciones - ${exerciseName}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <h6>Cómo realizar este ejercicio:</h6>
+              <div class="alert alert-light">
+                <p>Sigue las instrucciones paso a paso para realizar el ejercicio de forma segura y efectiva.</p>
+                <br>
+                <ul>
+    ${Array.isArray(exerciseInstructions)
+      ? exerciseInstructions.map(instr => `<li>${instr}</li>`).join('')
+      : exerciseInstructions.split(',').map(instr => `<li>${instr.trim()}</li>`).join('')
+    }
+  </ul>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Remover modal existente si hay uno
+    const existingModal = document.getElementById('instructionsModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+    modal.show();
+  }
+
+  // Mostrar notificaciones
+  function showNotification(message, type = 'info') {
+    let iconClass = 'info-circle-fill';
+    if (type === 'success') iconClass = 'check-circle-fill';
+    else if (type === 'warning') iconClass = 'exclamation-triangle-fill';
+    else if (type === 'error') iconClass = 'exclamation-triangle-fill';
+    
+    // Convertir 'error' a 'danger' para Bootstrap
+    const bootstrapType = type === 'error' ? 'danger' : type;
+    
+    const alertHtml = `
+      <div class="alert alert-${bootstrapType} alert-dismissible fade show position-fixed" 
+           style="top: 20px; right: 20px; z-index: 1050; min-width: 300px;" 
+           role="alert">
+        <i class="bi bi-${iconClass}"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', alertHtml);
+    
+    // Auto-remove después de 4 segundos
+    setTimeout(() => {
+      const alerts = document.querySelectorAll('.alert');
+      if (alerts.length > 0) {
+        alerts[alerts.length - 1].remove();
+      }
+    }, 4000);
+  }
+
+  // Guardar progreso localmente
+  function saveProgress(exerciseName) {
+    const today = new Date().toDateString();
+    let progress = JSON.parse(localStorage.getItem('trainingProgress') || '{}');
+    
+    if (!progress[today]) {
+      progress[today] = [];
+    }
+    
+    if (!progress[today].includes(exerciseName)) {
+      progress[today].push(exerciseName);
+      localStorage.setItem('trainingProgress', JSON.stringify(progress));
+    }
+  }
+</script>
+
+<style>
+  .card {
+    transition: all 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .btn-success:not(:disabled):not(.disabled) {
+    animation: pulse 1s;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .alert {
+    border-left: 4px solid;
+  }
+  
+  .alert-info {
+    border-left-color: #0dcaf0;
+  }
+  
+  .alert-success {
+    border-left-color: #198754;
+  }
+</style>
 </body>
 
 </html>

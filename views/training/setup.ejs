@@ -42,31 +42,232 @@
           
           <form action="/training/generate" method="POST">
             
-            <!-- Nivel de Condición Física -->
-            <div class="mb-3">
-              <label for="fitness_level" class="form-label"><strong>Nivel de Condición Física</strong></label>
-              <select class="form-select" id="fitness_level" name="fitness_level" required>
-                <option value="principiante" <%= (userGoals && userGoals.fitness_level === 'principiante') ? 'selected' : '' %>>Principiante</option>
-                <option value="intermedio" <%= (userGoals && userGoals.fitness_level === 'intermedio') ? 'selected' : '' %>>Intermedio</option>
-                <option value="avanzado" <%= (userGoals && userGoals.fitness_level === 'avanzado') ? 'selected' : '' %>>Avanzado</option>
-              </select>
+            <!-- Información Personal -->
+            <div class="mb-4">
+                <h5 class="text-primary mb-3"><i class="bi bi-person-fill"></i> Información Personal</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="age" class="form-label"><strong>Edad</strong></label>
+                            <input type="number" class="form-control" id="age" name="age" min="13" max="100" 
+                                   value="<%= (userGoals && userGoals.age) ? userGoals.age : '' %>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="gender" class="form-label"><strong>Género</strong></label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="">Seleccionar</option>
+                                <option value="male" <%= (userGoals && userGoals.gender === 'male') ? 'selected' : '' %>>Masculino</option>
+                                <option value="female" <%= (userGoals && userGoals.gender === 'female') ? 'selected' : '' %>>Femenino</option>
+                                <option value="other" <%= (userGoals && userGoals.gender === 'other') ? 'selected' : '' %>>Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="height" class="form-label"><strong>Altura (cm)</strong></label>
+                            <input type="number" class="form-control" id="height" name="height" min="120" max="250" 
+                                   value="<%= (userGoals && userGoals.height) ? userGoals.height : '' %>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="current_weight" class="form-label"><strong>Peso Actual (kg)</strong></label>
+                            <input type="number" class="form-control" id="current_weight" name="current_weight" 
+                                   min="30" max="300" step="0.1" 
+                                   value="<%= (userGoals && userGoals.current_weight) ? userGoals.current_weight : '' %>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="target_weight" class="form-label"><strong>Peso Objetivo (kg)</strong></label>
+                            <input type="number" class="form-control" id="target_weight" name="target_weight" 
+                                   min="30" max="300" step="0.1" 
+                                   value="<%= (userGoals && userGoals.target_weight) ? userGoals.target_weight : '' %>">
+                            <small class="form-text text-muted">Opcional - Solo si tu objetivo es cambiar de peso</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="activity_level" class="form-label"><strong>Nivel de Actividad Diaria</strong></label>
+                    <select class="form-select" id="activity_level" name="activity_level" required>
+                        <option value="sedentary" <%= (userGoals && userGoals.activity_level === 'sedentary') ? 'selected' : '' %>>Sedentario (trabajo de oficina, poco ejercicio)</option>
+                        <option value="lightly_active" <%= (userGoals && userGoals.activity_level === 'lightly_active') ? 'selected' : '' %>>Ligeramente activo (ejercicio ligero 1-3 días/semana)</option>
+                        <option value="moderately_active" <%= (userGoals && userGoals.activity_level === 'moderately_active') ? 'selected' : '' %>>Moderadamente activo (ejercicio moderado 3-5 días/semana)</option>
+                        <option value="very_active" <%= (userGoals && userGoals.activity_level === 'very_active') ? 'selected' : '' %>>Muy activo (ejercicio intenso 6-7 días/semana)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="experience_years" class="form-label"><strong>Años de Experiencia en Ejercicio</strong></label>
+                    <input type="number" class="form-control" id="experience_years" name="experience_years" 
+                           min="0" max="50" value="<%= (userGoals && userGoals.experience_years) ? userGoals.experience_years : 0 %>">
+                </div>
             </div>
 
-            <!-- Objetivo Principal -->
-            <div class="mb-3">
-              <label for="main_goal" class="form-label"><strong>Objetivo Principal</strong></label>
-              <select class="form-select" id="main_goal" name="main_goal" required>
-                <option value="perder_peso" <%= (userGoals && userGoals.main_goal === 'perder_peso') ? 'selected' : '' %>>Perder Peso</option>
-                <option value="ganar_musculo" <%= (userGoals && userGoals.main_goal === 'ganar_musculo') ? 'selected' : '' %>>Ganar Masa Muscular</option>
-                <option value="mejorar_resistencia" <%= (userGoals && userGoals.main_goal === 'mejorar_resistencia') ? 'selected' : '' %>>Mejorar Resistencia</option>
-                <option value="mantener_forma" <%= (userGoals && userGoals.main_goal === 'mantener_forma') ? 'selected' : '' %>>Mantener la Forma Física</option>
-              </select>
+            <!-- Objetivos de Entrenamiento -->
+            <div class="mb-4">
+                <h5 class="text-primary mb-3"><i class="bi bi-target"></i> Objetivos de Entrenamiento</h5>
+                
+                <!-- Nivel de Condición Física -->
+                <div class="mb-3">
+                  <label for="fitness_level" class="form-label"><strong>Nivel de Condición Física</strong></label>
+                  <select class="form-select" id="fitness_level" name="fitness_level" required>
+                    <option value="principiante" <%= (userGoals && userGoals.fitness_level === 'principiante') ? 'selected' : '' %>>Principiante</option>
+                    <option value="intermedio" <%= (userGoals && userGoals.fitness_level === 'intermedio') ? 'selected' : '' %>>Intermedio</option>
+                    <option value="avanzado" <%= (userGoals && userGoals.fitness_level === 'avanzado') ? 'selected' : '' %>>Avanzado</option>
+                  </select>
+                </div>
+
+                <!-- Objetivo Principal -->
+                <div class="mb-3">
+                  <label for="main_goal" class="form-label"><strong>Objetivo Principal</strong></label>
+                  <select class="form-select" id="main_goal" name="main_goal" required>
+                    <option value="perder_peso" <%= (userGoals && userGoals.main_goal === 'perder_peso') ? 'selected' : '' %>>Perder Peso</option>
+                    <option value="ganar_musculo" <%= (userGoals && userGoals.main_goal === 'ganar_musculo') ? 'selected' : '' %>>Ganar Masa Muscular</option>
+                    <option value="mejorar_resistencia" <%= (userGoals && userGoals.main_goal === 'mejorar_resistencia') ? 'selected' : '' %>>Mejorar Resistencia</option>
+                    <option value="mantener_forma" <%= (userGoals && userGoals.main_goal === 'mantener_forma') ? 'selected' : '' %>>Mantener la Forma Física</option>
+                  </select>
+                </div>
+
+                <!-- Objetivos Secundarios -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>Objetivos Secundarios (Opcionales)</strong></label>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="mejorar_flexibilidad" id="sec_flex" name="secondary_goals">
+                                <label class="form-check-label" for="sec_flex">Mejorar Flexibilidad</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="reducir_estres" id="sec_stress" name="secondary_goals">
+                                <label class="form-check-label" for="sec_stress">Reducir Estrés</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="mejorar_postura" id="sec_posture" name="secondary_goals">
+                                <label class="form-check-label" for="sec_posture">Mejorar Postura</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="aumentar_energia" id="sec_energy" name="secondary_goals">
+                                <label class="form-check-label" for="sec_energy">Aumentar Energía</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="mejorar_sueno" id="sec_sleep" name="secondary_goals">
+                                <label class="form-check-label" for="sec_sleep">Mejorar Calidad del Sueño</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="competicion" id="sec_comp" name="secondary_goals">
+                                <label class="form-check-label" for="sec_comp">Preparación para Competición</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Días de Entrenamiento por Semana -->
+                <div class="mb-3">
+                  <label for="training_days_per_week" class="form-label"><strong>Días de Entrenamiento por Semana</strong></label>
+                  <input type="number" class="form-control" id="training_days_per_week" name="training_days_per_week" 
+                         min="1" max="7" value="<%= (userGoals && userGoals.training_days_per_week) ? userGoals.training_days_per_week : 3 %>" required>
+                </div>
+
+                <!-- Horario Preferido -->
+                <div class="mb-3">
+                    <label for="preferred_time" class="form-label"><strong>Horario Preferido para Entrenar</strong></label>
+                    <select class="form-select" id="preferred_time" name="preferred_time">
+                        <option value="any" <%= (userGoals && userGoals.preferred_time === 'any') ? 'selected' : '' %>>Sin preferencia</option>
+                        <option value="morning" <%= (userGoals && userGoals.preferred_time === 'morning') ? 'selected' : '' %>>Mañana (6:00 - 12:00)</option>
+                        <option value="afternoon" <%= (userGoals && userGoals.preferred_time === 'afternoon') ? 'selected' : '' %>>Tarde (12:00 - 18:00)</option>
+                        <option value="evening" <%= (userGoals && userGoals.preferred_time === 'evening') ? 'selected' : '' %>>Noche (18:00 - 22:00)</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Días de Entrenamiento por Semana -->
-            <div class="mb-3">
-              <label for="training_days_per_week" class="form-label"><strong>Días de Entrenamiento por Semana</strong></label>
-              <input type="number" class="form-control" id="training_days_per_week" name="training_days_per_week" min="1" max="7" value="<%= (userGoals && userGoals.training_days_per_week) ? userGoals.training_days_per_week : 3 %>" required>
+            <!-- Consideraciones de Salud -->
+            <div class="mb-4">
+                <label class="form-label"><strong>Consideraciones de Salud</strong></label>
+                <p class="text-muted small">Selecciona cualquier condición médica o lesión que tengas. Esto nos ayudará a recomendarte ejercicios seguros y efectivos.</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="problemas_cardiacos" id="cond_cardiacos" name="health_conditions">
+                            <label class="form-check-label" for="cond_cardiacos">Problemas Cardíacos</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="presion_alta" id="cond_presion" name="health_conditions">
+                            <label class="form-check-label" for="cond_presion">Presión Arterial Alta</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="diabetes" id="cond_diabetes" name="health_conditions">
+                            <label class="form-check-label" for="cond_diabetes">Diabetes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="asma" id="cond_asma" name="health_conditions">
+                            <label class="form-check-label" for="cond_asma">Asma</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="artritis" id="cond_artritis" name="health_conditions">
+                            <label class="form-check-label" for="cond_artritis">Artritis</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="dolor_espalda" id="cond_espalda" name="health_conditions">
+                            <label class="form-check-label" for="cond_espalda">Dolor de Espalda</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="problemas_rodilla" id="cond_rodilla" name="health_conditions">
+                            <label class="form-check-label" for="cond_rodilla">Lesiones/Problemas de Rodilla</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="problemas_hombro" id="cond_hombro" name="health_conditions">
+                            <label class="form-check-label" for="cond_hombro">Lesiones/Problemas de Hombro</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label for="other_conditions" class="form-label">Otras condiciones o lesiones (opcional)</label>
+                    <textarea class="form-control" id="other_conditions" name="other_conditions" rows="2"></textarea>
+                </div>
+            </div>
+
+            <!-- Preferencias de Entrenamiento -->
+            <div class="mb-4">
+                <label class="form-label"><strong>Preferencias de Entrenamiento</strong></label>
+                <div class="mb-3">
+                    <label for="time_per_session" class="form-label">Duración de la sesión (minutos)</label>
+                    <input type="number" class="form-control" id="time_per_session" name="time_per_session" min="15" max="120" value="45">
+                </div>
+                <label class="form-label">Equipamiento Disponible</label>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="sin_equipo" id="equip_ninguno" name="equipment">
+                            <label class="form-check-label" for="equip_ninguno">Sin Equipo (Peso Corporal)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="mancuernas" id="equip_mancuernas" name="equipment">
+                            <label class="form-check-label" for="equip_mancuernas">Mancuernas</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="bandas_resistencia" id="equip_bandas" name="equipment">
+                            <label class="form-check-label" for="equip_bandas">Bandas de Resistencia</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="kettlebells" id="equip_kettlebells" name="equipment">
+                            <label class="form-check-label" for="equip_kettlebells">Kettlebells</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="cardio_maquina" id="equip_cardio" name="equipment">
+                            <label class="form-check-label" for="equip_cardio">Cinta de Correr / Bici Estática</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="d-grid">
