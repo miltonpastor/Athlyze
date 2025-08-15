@@ -42,16 +42,30 @@
                             <i class="bi bi-journal-plus me-1"></i>Actividades
                         </a>
                     </li>
+                    <% if (user && (user.plan === 'smart' || user.plan === 'pro')) { %>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/reports">
-                            <i class="bi bi-graph-up me-1"></i>Reportes
+                        <a class="nav-link" href="/training/plan">
+                            <i class="bi bi-calendar-check me-1"></i>Mi Plan
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/suggestions">
-                            <i class="bi bi-lightbulb me-1"></i>Consejos
-                        </a>
-                    </li>
+                    <% } %>
+                    <% if (user.plan==='smart' || user.plan==='pro' ) { %>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/nutrition">
+                                <i class="bi bi-apple me-1"></i>Nutrición
+                            </a>
+                        </li>
+                        <% } %>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="/reports">
+                                    <i class="bi bi-graph-up me-1"></i>Reportes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/suggestions">
+                                    <i class="bi bi-lightbulb me-1"></i>Consejos
+                                </a>
+                            </li>
                 </ul>
 
                 <ul class="navbar-nav">

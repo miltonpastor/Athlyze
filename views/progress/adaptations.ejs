@@ -1,0 +1,513 @@
+<%- include('../layout') %>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="bi bi-graph-up me-2 text-primary"></i>
+                        Adaptaciones de Plan
+                    </h2>
+                    <p class="text-muted mb-0">Gestiona las mejoras automáticas de tu plan de entrenamiento</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="runProgressEvaluation(this)">
+                        <i class="bi bi-search me-2"></i>Evaluar Progreso
+                    </button>
+                </div>
+            </div>
+
+            <!-- Evaluaciones Pendientes -->
+            <% if (evaluations && evaluations.length > 0) { %>
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            <h5 class="mb-0">
+                                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                                Adaptaciones Recomendadas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <% evaluations.forEach(function(evaluation, index) { %>
+                            <div class="alert alert-warning d-flex justify-content-between align-items-start" id="evaluation-<%= evaluation.id %>">
+                                <div>
+                                    <h6 class="alert-heading mb-2">
+                                        <%= evaluation.notification_title || 'Evaluación de Progreso' %>
+                                    </h6>
+                                    <p class="mb-2">
+                                        <%= evaluation.notification_message || 'Se han detectado oportunidades de mejora en tu plan actual.' %>
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar me-1"></i>
+                                        <%= new Date(evaluation.created_at).toLocaleDateString('es-ES', { 
+                                            year: 'numeric', 
+                                            month: 'long', 
+                                            day: 'numeric' 
+                                        }) %>
+                                        | Confianza: <%= Math.round(evaluation.confidence_score * 100) %>%
+                                    </small>
+                                    
+                                    <!-- Indicadores de Estancamiento -->
+                                    <div class="mt-2">
+                                        <h6>Indicadores detectados:</h6>
+                                        <% 
+                                        try {
+                                            const indicators = JSON.parse(evaluation.stagnation_indicators || '[]');
+                                            if (indicators && indicators.length > 0) {
+                                                indicators.forEach(function(indicator) { 
+                                        %>
+                                        <span class="badge bg-<%= indicator.severity === 'high' ? 'danger' : indicator.severity === 'medium' ? 'warning' : 'info' %> me-1">
+                                            <%= indicator.type ? indicator.type.replace(/_/g, ' ') : 'Indicador' %>
+                                        </span>
+                                        <% 
+                                                });
+                                            } else { 
+                                        %>
+                                        <span class="badge bg-secondary">Sin indicadores específicos</span>
+                                        <% 
+                                            }
+                                        } catch(e) { 
+                                        %>
+                                        <span class="badge bg-secondary">Error al cargar indicadores</span>
+                                        <% } %>
+                                    </div>
+
+                                    <!-- Recomendaciones -->
+                                    <div class="mt-3">
+                                        <h6>Recomendaciones:</h6>
+                                        <% 
+                                        try {
+                                            const recommendations = JSON.parse(evaluation.adjustment_details || '[]');
+                                            if (recommendations && recommendations.length > 0) {
+                                                recommendations.slice(0, 2).forEach(function(rec) { 
+                                        %>
+                                        <div class="mb-2">
+                                            <span class="badge bg-primary me-2">
+                                                <%= rec.type ? rec.type.replace(/_/g, ' ') : 'Recomendación' %>
+                                            </span>
+                                            <%= rec.description || 'Descripción no disponible' %>
+                                        </div>
+                                        <% 
+                                                });
+                                            } else { 
+                                        %>
+                                        <div class="mb-2">
+                                            <span class="badge bg-secondary me-2">General</span>
+                                            Continúa con tu plan actual y mantén consistencia en tus entrenamientos.
+                                        </div>
+                                        <% 
+                                            }
+                                        } catch(e) { 
+                                        %>
+                                        <div class="mb-2">
+                                            <span class="badge bg-secondary me-2">Error</span>
+                                            No se pudieron cargar las recomendaciones.
+                                        </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button class="btn btn-success btn-sm me-2" 
+                                            onclick="applyAdaptation(<%= evaluation.id %>, '<%= evaluation.adjustment_type %>')">
+                                        <i class="bi bi-check-circle me-1"></i>Aplicar
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" 
+                                            onclick="dismissEvaluation(<%= evaluation.id %>)">
+                                        <i class="bi bi-x-circle me-1"></i>Descartar
+                                    </button>
+                                    <button class="btn btn-info btn-sm" 
+                                            onclick="showEvaluationDetails(<%= evaluation.id %>)">
+                                        <i class="bi bi-info-circle me-1"></i>Detalles
+                                    </button>
+                                </div>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+
+            <!-- Historial de Adaptaciones -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clock-history me-2"></i>
+                                Historial de Adaptaciones
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <% if (history && history.length > 0) { %>
+                            <div class="timeline">
+                                <% history.forEach(function(adaptation, index) { %>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-primary"></div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <%= adaptation.adaptation_type.replace(/_/g, ' ').toUpperCase() %>
+                                                </h6>
+                                                <p class="text-muted mb-2">
+                                                    <%= adaptation.adaptation_reason %>
+                                                </p>
+                                                <% if (adaptation.old_plan_title && adaptation.new_plan_title) { %>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-arrow-right me-1"></i>
+                                                    <%= adaptation.old_plan_title %> → <%= adaptation.new_plan_title %>
+                                                </small>
+                                                <% } %>
+                                            </div>
+                                            <div class="text-end">
+                                                <small class="text-muted">
+                                                    <%= new Date(adaptation.created_at).toLocaleDateString('es-ES') %>
+                                                </small>
+                                                <% if (adaptation.effectiveness_score) { %>
+                                                <div class="mt-1">
+                                                    <% for(let i = 1; i <= 5; i++) { %>
+                                                    <i class="bi bi-star<%= i <= adaptation.effectiveness_score ? '-fill' : '' %> text-warning"></i>
+                                                    <% } %>
+                                                </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }); %>
+                            </div>
+                            <% } else { %>
+                            <div class="text-center py-4">
+                                <i class="bi bi-graph-up display-4 text-muted mb-3"></i>
+                                <h5 class="text-muted">Sin adaptaciones previas</h5>
+                                <p class="text-muted mb-0">
+                                    Cuando detectemos oportunidades de mejora en tu progreso, las adaptaciones aparecerán aquí.
+                                </p>
+                            </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para Registrar Medidas -->
+            <div class="modal fade" id="measurementsModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-ruler me-2"></i>
+                                Registrar Medidas Corporales
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="measurementsForm">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="weight" class="form-label">Peso (kg) *</label>
+                                            <input type="number" step="0.1" class="form-control" id="weight" name="weight" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="body_fat_percentage" class="form-label">% Grasa Corporal</label>
+                                            <input type="number" step="0.1" class="form-control" id="body_fat_percentage" name="body_fat_percentage">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="muscle_mass" class="form-label">Masa Muscular (kg)</label>
+                                            <input type="number" step="0.1" class="form-control" id="muscle_mass" name="muscle_mass">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="waist_circumference" class="form-label">Cintura (cm)</label>
+                                            <input type="number" step="0.1" class="form-control" id="waist_circumference" name="waist_circumference">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="chest_circumference" class="form-label">Pecho (cm)</label>
+                                            <input type="number" step="0.1" class="form-control" id="chest_circumference" name="chest_circumference">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="arm_circumference" class="form-label">Brazo (cm)</label>
+                                            <input type="number" step="0.1" class="form-control" id="arm_circumference" name="arm_circumference">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="thigh_circumference" class="form-label">Muslo (cm)</label>
+                                            <input type="number" step="0.1" class="form-control" id="thigh_circumference" name="thigh_circumference">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="resting_heart_rate" class="form-label">FC Reposo (bpm)</label>
+                                            <input type="number" class="form-control" id="resting_heart_rate" name="resting_heart_rate">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="blood_pressure_systolic" class="form-label">Presión Sistólica</label>
+                                            <input type="number" class="form-control" id="blood_pressure_systolic" name="blood_pressure_systolic">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="blood_pressure_diastolic" class="form-label">Presión Diastólica</label>
+                                            <input type="number" class="form-control" id="blood_pressure_diastolic" name="blood_pressure_diastolic">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label for="notes" class="form-label">Notas Adicionales</label>
+                                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i>Guardar Medidas
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- CSS personalizado para la timeline -->
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -37px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #0d6efd;
+}
+</style>
+
+<script>
+
+// Función para ejecutar evaluación de progreso
+async function runProgressEvaluation(btnElement) {
+    try {
+        const btn = btnElement;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Evaluando...';
+        btn.disabled = true;
+
+        const response = await fetch('/progress/evaluate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ period_days: 30 })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            if (result.stagnation_analysis.stagnation_detected) {
+                showNotification('¡Evaluación completada! Se detectó estancamiento y se generaron recomendaciones.', 'warning');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showNotification('¡Evaluación completada! Tu progreso está en buen camino. Continúa con tu plan actual.', 'success');
+            }
+        } else {
+            throw new Error(result.message || 'Error en la evaluación');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al realizar la evaluación: ' + error.message, 'danger');
+    } finally {
+        const btn = btnElement;
+        btn.innerHTML = '<i class="bi bi-search me-2"></i>Evaluar Progreso';
+        btn.disabled = false;
+    }
+}
+
+// Función para aplicar adaptación
+async function applyAdaptation(evaluationId, adaptationType) {
+    try {
+        const response = await fetch(`/progress/apply-adaptation/${evaluationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ adaptation_type: adaptationType })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Adaptación aplicada correctamente. Tu plan ha sido actualizado.', 'success');
+            document.getElementById(`evaluation-${evaluationId}`).remove();
+        } else {
+            throw new Error(result.message || 'Error al aplicar adaptación');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al aplicar la adaptación: ' + error.message, 'danger');
+    }
+}
+
+// Función para descartar evaluación
+async function dismissEvaluation(evaluationId) {
+    if (!confirm('¿Estás seguro de que deseas descartar esta recomendación?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/progress/apply-adaptation/${evaluationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ adaptation_type: 'dismissed' })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById(`evaluation-${evaluationId}`).remove();
+            showNotification('Recomendación descartada.', 'info');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al descartar la recomendación.', 'danger');
+    }
+}
+
+// Función para mostrar detalles de evaluación
+function showEvaluationDetails(evaluationId) {
+    // Implementar modal con detalles completos de la evaluación
+    alert('Funcionalidad en desarrollo: Mostrar detalles completos de la evaluación #' + evaluationId);
+}
+
+// Función para mostrar modal de medidas
+function showMeasurementsModal() {
+    const modal = new bootstrap.Modal(document.getElementById('measurementsModal'));
+    modal.show();
+}
+
+// Manejar envío del formulario de medidas
+document.getElementById('measurementsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+        const response = await fetch('/progress/measurements', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showNotification('Medidas registradas correctamente.', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('measurementsModal')).hide();
+            this.reset();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al registrar medidas: ' + error.message, 'danger');
+    }
+});
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1055; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Agregar botón de medidas al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar botón para registrar medidas en el header
+    const headerDiv = document.querySelector('.d-flex.justify-content-between.align-items-center.mb-4');
+    if (headerDiv) {
+        const buttonGroup = document.createElement('div');
+        buttonGroup.className = 'btn-group';
+        buttonGroup.innerHTML = `
+            <button class="btn btn-primary" onclick="runProgressEvaluation(this)">
+                <i class="bi bi-search me-2"></i>Evaluar Progreso
+            </button>
+        `;
+        
+        // Reemplazar el botón existente con el grupo de botones
+        const existingButton = headerDiv.querySelector('button');
+        if (existingButton) {
+            existingButton.replaceWith(buttonGroup);
+        }
+    }
+});
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

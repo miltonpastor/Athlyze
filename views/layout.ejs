@@ -43,6 +43,18 @@
                                 <i class="bi bi-journal-plus me-1"></i>Actividades
                             </a>
                         </li>
+                        <% if (user && (user.plan === 'smart' || user.plan === 'pro')) { %>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/training/plan">
+                                <i class="bi bi-calendar-check me-1"></i>Mi Plan
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/progress/adaptations">
+                                <i class="bi bi-graph-up-arrow me-1"></i>Progreso
+                            </a>
+                        </li>
+                        <% } %>
                         <li class="nav-item">
                             <a class="nav-link" href="/reports">
                                 <i class="bi bi-graph-up me-1"></i>Reportes
@@ -58,6 +70,16 @@
 
                 <ul class="navbar-nav">
                     <% if (isLoggedIn) { %>
+                        <% if (user && (user.plan === 'smart' || user.plan === 'pro')) { %>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="/progress/adaptations" id="progressNotificationBell">
+                                <i class="bi bi-bell fs-5"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationCount" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+                        <% } %>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle me-1"></i>
@@ -69,6 +91,10 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Perfil</a>
                                 </li>
+                                <% if (user && (user.plan === 'smart' || user.plan === 'pro')) { %>
+                                <li><a class="dropdown-item" href="/training/plan"><i class="bi bi-calendar-check me-2"></i>Mi Plan de Entrenamiento</a>
+                                </li>
+                                <% } %>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
@@ -110,33 +136,67 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
                 <% } %>
-
-                    <!-- Main Content -->
-                    <main class="py-4">
-                        <%- body %>
-                    </main>
-
-                    <!-- Footer -->
-                    <footer class="bg-light mt-5 py-4">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="fw-bold">Athlyze</h6>
-                                    <p class="text-muted small">Tu compañero para una vida más saludable</p>
-                                </div>
-                                <div class="col-md-6 text-md-end">
-                                    <p class="text-muted small mb-0">
-                                        © 2024 Athlyze. Desarrollado con <i class="bi bi-heart-fill text-danger"></i>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </footer>
-
                     <!-- Bootstrap JS -->
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
                     <!-- Custom JS -->
                     <script src="/js/app.js"></script>
+                    
+                    <% if (isLoggedIn && user && (user.plan === 'smart' || user.plan === 'pro')) { %>
+                    <script>
+                        // Cargar notificaciones de progreso al cargar la página
+                        async function loadProgressNotifications() {
+                            try {
+                                const response = await fetch('/progress/notifications');
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    const unreadNotifications = data.notifications.filter(n => !n.read_at);
+                                    
+                                    const notificationCount = document.getElementById('notificationCount');
+                                    if (notificationCount && unreadNotifications.length > 0) {
+                                        notificationCount.textContent = unreadNotifications.length;
+                                        notificationCount.style.display = 'inline';
+                                        
+                                        // Agregar efecto de parpadeo si hay notificaciones importantes
+                                        const hasImportantNotifications = unreadNotifications.some(n => 
+                                            n.notification_type === 'stagnation_alert' || n.action_required
+                                        );
+                                        
+                                        if (hasImportantNotifications) {
+                                            const bell = document.getElementById('progressNotificationBell');
+                                            bell.classList.add('notification-pulse');
+                                        }
+                                    }
+                                }
+                            } catch (error) {
+                                console.warn('No se pudieron cargar las notificaciones de progreso:', error);
+                            }
+                        }
+
+                        // Ejecutar al cargar la página
+                        document.addEventListener('DOMContentLoaded', loadProgressNotifications);
+
+                        // Actualizar notificaciones cada 5 minutos
+                        setInterval(loadProgressNotifications, 5 * 60 * 1000);
+                    </script>
+                    
+                    <style>
+                        .notification-pulse {
+                            animation: pulse 2s infinite;
+                        }
+
+                        @keyframes pulse {
+                            0% {
+                                transform: scale(1);
+                            }
+                            50% {
+                                transform: scale(1.1);
+                            }
+                            100% {
+                                transform: scale(1);
+                            }
+                        }
+                    </style>
+                    <% } %>
 </body>
 
 </html>
