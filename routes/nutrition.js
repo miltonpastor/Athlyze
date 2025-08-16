@@ -204,7 +204,29 @@ const generateNutritionPlan = (profile) => {
             total_carbs: dailyMeals.reduce((sum, meal) => sum + meal.carbs, 0),
             total_fats: dailyMeals.reduce((sum, meal) => sum + meal.fats, 0)
         });
+
+        // Debug: Log daily totals
+        const dayData = weekPlan[weekPlan.length - 1];
+        console.log(`Day ${day} totals - Calories: ${dayData.total_calories}, Protein: ${dayData.total_protein}, Carbs: ${dayData.total_carbs}, Fats: ${dayData.total_fats}`);
     }
+
+    return {
+        title: `Plan Alimenticio Personalizado - ${goal.replace('_', ' ').toUpperCase()}`,
+        description: `Plan generado para ${daily_calories} calorías diarias con ${meals_per_day} comidas por día`,
+        total_days: 7,
+        goal: goal,
+        restrictions: dietary_restrictions,
+        allergies: allergies,
+        week_plan: weekPlan
+    }
+
+    // Validation: Ensure plan is complete
+    console.log('=== PLAN GENERATION VALIDATION ===');
+    console.log('Total days generated:', weekPlan.length);
+    console.log('All days have meals:', weekPlan.every(day => day.meals && day.meals.length > 0));
+    console.log('All days have totals:', weekPlan.every(day =>
+        day.total_calories > 0 && day.total_protein > 0 && day.total_carbs > 0 && day.total_fats > 0
+    ));
 
     return {
         title: `Plan Alimenticio Personalizado - ${goal.replace('_', ' ').toUpperCase()}`,
@@ -495,8 +517,20 @@ router.post('/generate', [
             disliked_foods: cleanDisliked
         });
 
+        // Verificar estructura del plan antes de guardar
+        console.log('=== DEBUGGING PLAN GENERATION ===');
+        console.log('Generated nutrition plan structure:', JSON.stringify(nutritionPlan, null, 2));
+        console.log('Week plan check:', nutritionPlan.week_plan ? 'EXISTS' : 'MISSING');
+        console.log('Week plan length:', nutritionPlan.week_plan ? nutritionPlan.week_plan.length : 'N/A');
+
+        // Verificar que week_plan existe y tiene datos
+        if (!nutritionPlan.week_plan || nutritionPlan.week_plan.length === 0) {
+            console.error('❌ ERROR: week_plan is missing or empty!');
+            throw new Error('Plan nutricional generado incorrectamente - week_plan vacío');
+        }
+
         // Guardar plan generado
-        console.log('Saving nutrition plan:', JSON.stringify(nutritionPlan, null, 2));
+        console.log('Saving nutrition plan to database...');
         await db.query(`
             INSERT INTO nutrition_plans (
                 user_id, plan_data, goal, created_at
@@ -537,8 +571,18 @@ router.get('/plan', requireAuth, requireSmartPlan, async (req, res) => {
         }
 
         const rawPlanData = planResult.rows[0].plan_data;
-        console.log('Raw plan_data:', rawPlanData);
+        console.log('=== DEBUGGING PLAN RETRIEVAL ===');
+        console.log('Raw plan_data from DB:', rawPlanData);
         console.log('Type of plan_data:', typeof rawPlanData);
+
+        // Verificar estructura específica de week_plan
+        if (rawPlanData && rawPlanData.week_plan) {
+            console.log('✅ week_plan exists in rawPlanData');
+            console.log('Week plan length:', rawPlanData.week_plan.length);
+            console.log('First day sample:', rawPlanData.week_plan[0]);
+        } else {
+            console.error('❌ week_plan missing in rawPlanData!');
+        }
 
         let plan;
         if (typeof rawPlanData === 'string') {
